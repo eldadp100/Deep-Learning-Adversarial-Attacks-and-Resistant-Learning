@@ -42,6 +42,9 @@ class HyperparamsGen:
         """ returns NONE if there are no more hps"""
         pass
 
+    def restart(self):
+        pass
+
 
 class GridSearch(HyperparamsGen):
     """ Implemented as a generator for a case of many hyperparams"""
@@ -72,6 +75,9 @@ class GridSearch(HyperparamsGen):
         self.indices[max(0, i)] += 1
 
         return hp
+
+    def restart(self):
+        self.indices = [0] * len(self.hps_keys)
 
 
 def measure_resistance_on_test(net, loss_fn, test_dataset, to_attacks, plot_successful_attacks=False, plots_title="",
@@ -108,6 +114,7 @@ def reset_net_parameters(model):
 
 
 def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, device=None):
+    hps_gen.restart()
     net_best_hp, net_best_acc = None, 0
     while True:
         hp = hps_gen.next()
@@ -131,7 +138,7 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
             net_best_hp = hp
 
     full_train_dl = DataLoader(train_dataset, batch_size=net_best_hp["batch_size"], shuffle=True)
-    net.apply(weight_reset)
+    reset_net_parameters(net)
     epochs.restart()
     nn_optimizer = torch.optim.Adam(net.parameters(), net_best_hp["lr"])
     trainer.train_nn(net, nn_optimizer, loss_fn, full_train_dl, epochs, device=device)
@@ -140,6 +147,7 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
 
 def full_attack_of_trained_nn_with_hps(net, loss_fn, train_dataset, hps_gen, selected_nn_hp, attack_method,
                                        device=None, plot_successful_attacks=False):
+    hps_gen.restart()
     train_dl, val_dl = dls.get_train_val_dls(train_dataset, selected_nn_hp["batch_size"])
 
     best_attack, best_hp, best_score = None, None, 1

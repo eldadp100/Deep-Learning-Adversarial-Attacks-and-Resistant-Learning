@@ -153,5 +153,6 @@ if __name__ == '__main__':
         inc_capacity_nets.append(cap_net)
     for i, net in enumerate(inc_capacity_nets):
         epochs.restart()
+        net_training_hps_gen.restart()
         experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs,
                           net_name="capacity_{}".format(i))
