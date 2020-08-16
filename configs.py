@@ -9,6 +9,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 seed = None  # Specify Random Seed. Helps to debug issues that appear seldom.
 imgs_to_show = 4  # maximal number images to show in a grid of images
 dls_num_workers = 1  # Dataloaders number of workers - 0 for loading using the main process
+plot_test_successful_attacks = False  # cannot be displayed in NOVA
 
 """
 The default split ratios in the proj. suppose we have N samples then:
@@ -46,6 +47,6 @@ TrafficSigns_experiments_hps = {
     "nets_training": {
         "lr": [0.001],  # [0.001, 0.0005, 0.01],
         "batch_size": [128],
-        "optimizer": [torch.optim.SGD, torch.optim.Adam]
+        # "optimizer": [torch.optim.SGD, torch.optim.Adam]
     },
 }

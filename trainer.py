@@ -1,9 +1,6 @@
 import time
-from multiprocessing.spawn import freeze_support
-
 import torch
 from torch.utils.data import DataLoader
-from torch.utils.data.dataset import Subset
 
 
 class StoppingCriteria:
@@ -97,7 +94,7 @@ def train_nn(net, optimizer, loss_fn, dl, epochs: Epochs, attack=None, device=No
     :param epochs: number of epochs to train or early stopping.
     :param attack: the attack we want to defense from - only PGD and FGSM are implemented. None for natural training
                    (i.e. with no resistance to any specific attack).
-    :param device: the GPU cuda device. None for default (cpu).
+    :param device: use cuda or cpu
     """
     while not epochs.stop():
         batch_information_mat = []

@@ -74,94 +74,6 @@ class GridSearch(HyperparamsGen):
         return hp
 
 
-# Conv NN constructors:
-class ConvNN(nn.Module):
-    def __init__(self, params):
-        """
-        The purpose in using this class in the way it built is to make the process of creating CNNs with the ability
-        to control its capacity in efficient way (programming efficiency - not time efficiency).
-        I found it very useful in constructing experiments. I tried to make this class general as possible.
-        :param params: a dictionary with the following attributes:
-            capacity influence:
-            - channels_lst: lst of the channels sizes. the network complexity is inflected mostly by this parameter
-              * for efficiency channels_lst[0] is the number of input channels
-            - #FC_Layers: number of fully connected layers
-            - extras_blocks_components: in case we want to add layers from the list ["dropout", "max_pool", "batch norm"]
-                                        to each block we can do it. Their parameters are attributes of this dict also.
-              * notice that if max_pool in extras_blocks_components then we reduce dims using max_pool instead conv
-                layer (the conv layer will be with stride 1 and padding)
-            - p_dropout: the dropout parameter
-
-            net structure:
-            - in_wh: input width and height
-        """
-        super().__init__()
-        self.params = params
-        channels_lst = params["channels_lst"]
-        extras_block_components = params["extras_blocks_components"]
-
-        assert 2 <= len(channels_lst) <= 5
-        conv_layers = []
-        for i in range(1, len(channels_lst)):
-            if i is not None:
-                """
-                Dims calculations: next #channels x (nh-filter_size/2)+1 x (nw-filter_size/2)+1
-                """
-                filter_size, stride = (4, 2) if "max_pool" not in extras_block_components else (3, 1)
-                conv_layers.append(nn.Conv2d(channels_lst[i - 1], channels_lst[i], filter_size, stride, 1, bias=False))
-
-                for comp in extras_block_components:
-                    if comp == "dropout":
-                        conv_layers.append(nn.Dropout(params["p_dropout"]))
-                    if comp == "max_pool":
-                        conv_layers.append(nn.MaxPool2d(2, 2))
-                    if comp == "batch_norm":
-                        conv_layers.append(nn.BatchNorm2d(channels_lst[i]))
-
-                conv_layers.append(params["activation"]())
-        self.cnn = nn.Sequential(*conv_layers)
-
-        lin_layers = []
-        wh = params["in_wh"] // (2 ** (len(channels_lst) - 1))  # width and height of last layer output
-        lin_layer_width = channels_lst[-1] * (wh ** 2)
-        for _ in range(params["#FC_Layers"] - 1):
-            lin_layers.append(nn.Linear(lin_layer_width, lin_layer_width))
-        lin_layers.append(nn.Linear(lin_layer_width, params["out_size"]))
-        self.linear_nn = nn.Sequential(*lin_layers)
-
-        """ we use CE loss so we don't need to apply softmax (for test loss we also use the same CE. for accuracy
-            we choose the highest value - this property is saved under softmax)"""
-
-    def forward(self, x):
-        if len(x.shape) == 3:
-            x = x.view(1, *x.shape)
-        assert x.shape[2] == x.shape[3] == self.params["in_wh"]
-        assert x.shape[1] == self.params["channels_lst"][0]
-
-        cnn_output = self.cnn(x).view((x.shape[0], -1))
-        lin_output = self.linear_nn(cnn_output)
-        return lin_output
-
-
-def create_conv_nn(params):
-    return ConvNN(params)
-
-
-# TODO: here use dataloader transformers...
-def fix_data_labels(xs, ys, sample_shape):
-    if xs[0].shape != sample_shape:
-        # xs = xs.view(xs.shape[0], dataset[0][0].shape[0], xs.shape[1], xs.shape[2])
-        xs = xs.view(xs.shape[0], 1, xs.shape[1], xs.shape[2])
-    xs = xs.type(torch.FloatTensor)
-    return xs, ys
-
-
-# TODO: CHANGE IT - use the dataloader used transformers to do that automatically...
-def subset_dataset_split(dataset: Subset):
-    xs, ys = dataset.dataset.data[dataset.indices], dataset.dataset.targets[dataset.indices]
-    return fix_data_labels(xs, ys, dataset[0][0].shape)
-
-
 def measure_resistance_on_test(net, loss_fn, test_dataset, to_attacks, plot_successful_attacks=False, plots_title="",
                                device=None):
     """
@@ -189,14 +101,21 @@ def measure_resistance_on_test(net, loss_fn, test_dataset, to_attacks, plot_succ
     return results
 
 
-def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, device=None):
-    best_net, net_best_hp, net_best_acc = None, None, 0
+def reset_net_parameters(model):
+    for layer in model.children():
+        if hasattr(layer, 'reset_parameters'):
+            layer.reset_parameters()
 
+
+def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, device=None):
+    net_best_hp, net_best_acc = None, 0
     while True:
         hp = hps_gen.next()
         if hp is None:
             break
 
+        # restart previous execution
+        reset_net_parameters(net)
         epochs.restart()
         # set train and val dataloaders, optimizer
         train_dl, val_dl = dls.get_train_val_dls(train_dataset, hp["batch_size"])
@@ -210,9 +129,13 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
         if net_acc >= net_best_acc:
             net_best_acc = net_acc
             net_best_hp = hp
-            best_net = net
 
-    return best_net, net_best_hp, net_best_acc
+    full_train_dl = DataLoader(train_dataset, batch_size=net_best_hp["batch_size"], shuffle=True)
+    net.apply(weight_reset)
+    epochs.restart()
+    nn_optimizer = torch.optim.Adam(net.parameters(), net_best_hp["lr"])
+    trainer.train_nn(net, nn_optimizer, loss_fn, full_train_dl, epochs, device=device)
+    return net, net_best_hp, net_best_acc
 
 
 def full_attack_of_trained_nn_with_hps(net, loss_fn, train_dataset, hps_gen, selected_nn_hp, attack_method,
