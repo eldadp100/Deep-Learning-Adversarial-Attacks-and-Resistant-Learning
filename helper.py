@@ -181,7 +181,8 @@ def measure_resistance_on_test(net, loss_fn, test_dataset, to_attacks, plot_succ
         attack = attack_class(net, loss_fn, attack_hp)
         test_score, _ = attack.test_attack(test_dataloader,
                                            main_title="{} + {}".format(attack.name, plots_title),
-                                           plot_successful_attacks=plot_successful_attacks)
+                                           plot_successful_attacks=plot_successful_attacks,
+                                           device=device)
         results["%{}".format(attack.name)] = test_score
 
     results["test_acc"] = original_acc

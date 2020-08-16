@@ -28,22 +28,24 @@ TrafficSigns_experiments_configs = {
                              (0.2724, 0.2608, 0.2669))
     ]),
     "hps_construction_method": "grid",  # grid / random only.
-    "stopping_criteria": trainer.TimerStopping(10),  # trainer.ConstantStopping(5),
+    "stopping_criteria": trainer.ConstantStopping(4),  # trainer.TimerStopping(10),  # trainer.ConstantStopping(5),
     "loss_function": nn.CrossEntropyLoss(),  # the nets architectures are built based on CE loss
 }
 
 TrafficSigns_experiments_hps = {
     "FGSM": {
-        "epsilon": [0.001],  # [0.01, 0.001, 0.0001],
+        "epsilon": [0.007],  # [0.01, 0.001, 0.0001],
     },
 
     "PGD": {
-        "epsilon": [0.001],  # [0.01, 0.001, 0.0001],
-        "steps": [40],  # [5, 20, 40, 100]
+        "alpha": [2 / 255],  # [0.01, 0.001, 0.0001],
+        "steps": [40],
+        "epsilon": [0.3]  # [5, 20, 40, 100]
     },
 
     "nets_training": {
         "lr": [0.001],  # [0.001, 0.0005, 0.01],
-        "batch_size": [128]
-    }
+        "batch_size": [128],
+        "optimizer": [torch.optim.SGD, torch.optim.Adam]
+    },
 }

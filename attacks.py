@@ -24,7 +24,6 @@ class Attack:
         :param plot_successful_attacks: plot original vs adv imgs with additional information
         :return: the attack score.
         """
-
         # 1) calculate attack score
         self.net = self.net.to(device)
         num_successful_attacks = 0
@@ -32,9 +31,6 @@ class Attack:
         for i, (xs, ys) in enumerate(dataloader):
             if device is not None:
                 xs, ys = xs.to(device), ys.to(device)
-
-            if i > 1:
-                break
 
             constructed_examples = self.perturb(xs, ys, device=device)
             y_preds = self.net(xs)
@@ -98,10 +94,7 @@ class FGSM(Attack):
         self.name = "fgsm"
 
     def perturb(self, X, y, device=None):
-        X = X.to(device)
-        y = y.to(device)
         X.requires_grad = True
-        self.net = self.net.to(device)
         outputs = self.net(X)
 
         self.net.zero_grad()
@@ -112,13 +105,6 @@ class FGSM(Attack):
         attack_images = torch.clamp(attack_images, 0, 1)
 
         return attack_images
-
-
-
-
-
-
-
 
         # """
         # generates adversarial examples to given data points and labels (X, y) based on FGSM approach.
@@ -141,6 +127,7 @@ class PGD(Attack):
         """
         super().__init__(net, loss_fn)
         self.steps = hp["steps"]
+        self.alpha = hp["alpha"]
         self.epsilon = hp["epsilon"]
         self.name = "pgd"
 
@@ -148,19 +135,32 @@ class PGD(Attack):
         """
         generates adversarial examples to given data points and labels (X, y) based on PGD approach.
         """
-        X_adv = torch.autograd.Variable(X, requires_grad=True).to(device)
-        for j in range(self.steps):
-            y_pred = self.net(X_adv)
-            _loss = self.loss_fn(y_pred, y)
-            _loss.backward(retain_graph=True)
-            X_adv.retain_grad()
-            with torch.no_grad():
-                X_adv += self.epsilon * torch.sign(X_adv.grad)
-                # the projection:
-                Diff = torch.clamp(X_adv - X, -1, 1)  # l_inf projection on X (natural)
-                X_adv = X + Diff
-            if X_adv.grad is not None:
-                X_adv.grad.zero_()
-            X_adv.requires_grad_()
+        original_X = X
+        for i in range(self.steps):
+            X.requires_grad = True
+            outputs = self.net(X)
 
-        return X_adv
+            self.net.zero_grad()
+            cost = self.loss_fn(outputs, y).to(device)
+            cost.backward()
+
+            adv_images = X + self.alpha * X.grad.sign()
+            eta = torch.clamp(adv_images - original_X, min=-self.epsilon, max=self.epsilon)
+            X = torch.clamp(original_X + eta, min=0, max=1).detach_()
+        #
+        # X_adv = torch.autograd.Variable(X, requires_grad=True).to(device)
+        # for j in range(self.steps):
+        #     y_pred = self.net(X_adv)
+        #     _loss = self.loss_fn(y_pred, y)
+        #     _loss.backward(retain_graph=True)
+        #     X_adv.retain_grad()
+        #     with torch.no_grad():
+        #         X_adv += self.epsilon * torch.sign(X_adv.grad)
+        #         # the projection:
+        #         Diff = torch.clamp(X_adv - X, -1, 1)  # l_inf projection on X (natural)
+        #         X_adv = X + Diff
+        #     if X_adv.grad is not None:
+        #         X_adv.grad.zero_()
+        #     X_adv.requires_grad_()
+
+        return X

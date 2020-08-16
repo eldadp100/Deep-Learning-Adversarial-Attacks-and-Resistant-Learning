@@ -126,12 +126,12 @@ epochs = trainer.Epochs(stopping_criteria=experiment_configs["stopping_criteria"
 fgsm_resistant_mnist_net = helper.create_conv_nn(mnist_net_params)
 fgsm_nn_optimizer = torch.optim.SGD(fgsm_resistant_mnist_net.parameters(), nn_training_hp["lr"])
 fgsm_attack = attacks.FGSM(fgsm_resistant_mnist_net, _loss_fn, fgsm_hp)
-trainer.train_nn(fgsm_resistant_mnist_net, fgsm_nn_optimizer, _loss_fn, train_dl, epochs, fgsm_attack)
+trainer.train_nn(fgsm_resistant_mnist_net, fgsm_nn_optimizer, _loss_fn, train_dl, epochs, fgsm_attack, device=device)
 
 pgd_resistant_mnist_net = helper.create_conv_nn(mnist_net_params)
 pgd_nn_optimizer = torch.optim.SGD(pgd_resistant_mnist_net.parameters(), nn_training_hp["lr"])
 pgd_attack = attacks.PGD(pgd_resistant_mnist_net, _loss_fn, pgd_hp)
-trainer.train_nn(pgd_resistant_mnist_net, pgd_nn_optimizer, _loss_fn, train_dl, epochs, pgd_attack)
+trainer.train_nn(pgd_resistant_mnist_net, pgd_nn_optimizer, _loss_fn, train_dl, epochs, pgd_attack, device=device)
 
 # measure resistance on test:
 fgsm_resistance_results = helper.measure_resistance_on_test(fgsm_resistant_mnist_net, _loss_fn, _test_dataset,

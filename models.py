@@ -40,9 +40,9 @@ class Stn(nn.Module):
         return x
 
 
-class TrafficSignNet(nn.Module):
+class TrafficSignNet2(nn.Module):
     def __init__(self):
-        super(TrafficSignNet, self).__init__()
+        super().__init__()
         self.stn = Stn()
         self.conv1 = nn.Conv2d(3, 100, 5)
         self.conv1_bn = nn.BatchNorm2d(100)
@@ -67,5 +67,27 @@ class TrafficSignNet(nn.Module):
         x = x.view(-1, 250 * 3 * 3)
         x = F.elu(self.fc1(x))
         x = self.dropout(self.fc1_bn(x))
+        x = self.fc2(x)
+        return x
+
+
+class TrafficSignNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.stn = Stn()
+        self.conv1 = nn.Conv2d(3, 100, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(100, 150, 3)
+        self.conv3 = nn.Conv2d(150, 250, 1)
+        self.fc1 = nn.Linear(250 * 3 * 3, 350)
+        self.fc2 = nn.Linear(350, 43)
+
+    def forward(self, x):  # TODO: what is F.elu?
+        x = self.stn(x)
+        x = self.pool(F.elu(self.conv1(x)))
+        x = self.pool(F.elu(self.conv2(x)))
+        x = self.pool(F.elu(self.conv3(x)))
+        x = x.view(-1, 250 * 3 * 3)
+        x = F.elu(self.fc1(x))
         x = self.fc2(x)
         return x

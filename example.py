@@ -50,10 +50,11 @@ if __name__ == '__main__':
                                                                      device=device, plot_successful_attacks=False)
 
     # measure attacks on test (holdout)!!!
+    plot_test_successful_attacks = False
     resistance_results = helper.measure_resistance_on_test(net, _loss_fn, _testing_dataset,
                                                            [(attacks.FGSM, fgsm_hp),
                                                             (attacks.PGD, pgd_hp)],
-                                                           plot_successful_attacks=True,
+                                                           plot_successful_attacks=plot_test_successful_attacks,
                                                            device=device)
 
     test_acc = resistance_results["test_acc"]  # the accuracy without applying any attack
@@ -73,18 +74,18 @@ if __name__ == '__main__':
     fgsm_robust_net = models.TrafficSignNet().to(device)
     fgsm_nn_optimizer = torch.optim.SGD(fgsm_robust_net.parameters(), net_hp["lr"])  # TODO: change to ADAM
     fgsm_attack = attacks.FGSM(fgsm_robust_net, _loss_fn, fgsm_hp)
-    trainer.train_nn(fgsm_robust_net, fgsm_nn_optimizer, _loss_fn, train_dl, epochs, fgsm_attack)
+    trainer.train_nn(fgsm_robust_net, fgsm_nn_optimizer, _loss_fn, train_dl, epochs, fgsm_attack, device=device)
 
     pgd_robust_net = models.TrafficSignNet().to(device)
     pgd_nn_optimizer = torch.optim.SGD(pgd_robust_net.parameters(), net_hp["lr"])  # TODO: change to ADAM
     pgd_attack = attacks.PGD(pgd_robust_net, _loss_fn, pgd_hp)
-    trainer.train_nn(pgd_robust_net, pgd_nn_optimizer, _loss_fn, train_dl, epochs, pgd_attack)
+    trainer.train_nn(pgd_robust_net, pgd_nn_optimizer, _loss_fn, train_dl, epochs, pgd_attack, device=device)
 
     # measure resistance on test:
     fgsm_resistance_results = helper.measure_resistance_on_test(fgsm_robust_net, _loss_fn, _testing_dataset,
                                                                 [(attacks.FGSM, fgsm_hp),
                                                                  (attacks.PGD, pgd_hp)],
-                                                                plot_successful_attacks=True,
+                                                                plot_successful_attacks=plot_test_successful_attacks,
                                                                 plots_title="robust net built using FGSM",
                                                                 device=device)
     print("FGSM based trained robust net attacking results:")
@@ -93,7 +94,7 @@ if __name__ == '__main__':
     pgd_resistance_results = helper.measure_resistance_on_test(pgd_robust_net, _loss_fn, _testing_dataset,
                                                                [(attacks.FGSM, fgsm_hp),
                                                                 (attacks.PGD, pgd_hp)],
-                                                               plot_successful_attacks=True,
+                                                               plot_successful_attacks=plot_test_successful_attacks,
                                                                plots_title="robust net built using PGD",
                                                                device=device)
     print("PGD based trained robust net attacking results:")

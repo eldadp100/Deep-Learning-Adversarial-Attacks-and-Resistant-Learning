@@ -99,18 +99,17 @@ def train_nn(net, optimizer, loss_fn, dl, epochs: Epochs, attack=None, device=No
                    (i.e. with no resistance to any specific attack).
     :param device: the GPU cuda device. None for default (cpu).
     """
-    # torch.multiprocessing.freeze_support()
     while not epochs.stop():
         batch_information_mat = []
         for batch_num, (batch_data, batch_labels) in enumerate(dl):
             if device is not None:
                 batch_data, batch_labels = batch_data.to(device), batch_labels.to(device)
-            if batch_num > 10:
-                break
+
             # generate adversarial examples:
             adversarial_batch_data = None
             if attack is not None:
-                adversarial_batch_data = attack.perturb(batch_data, batch_labels, device=device)  # Danskin's Theorem applies here.
+                adversarial_batch_data = attack.perturb(batch_data, batch_labels,
+                                                        device=device)  # Danskin's Theorem applies here.
 
             # train on natural batch
             if attack is None:  # TODO: maybe need to be done anyway? Theoretically not...
@@ -134,7 +133,6 @@ def train_nn(net, optimizer, loss_fn, dl, epochs: Epochs, attack=None, device=No
             batch_acc = torch.div(batch_num_currect, len(batch_labels))
             batch_information_mat.append([_loss.item(), batch_acc.item()])
 
-            print(batch_acc)
         # summarize epoch (should be a part of the log):
         batch_information_mat = torch.tensor(batch_information_mat)
         emp_loss, emp_acc = torch.sum(batch_information_mat.T, dim=1) / len(batch_information_mat)
