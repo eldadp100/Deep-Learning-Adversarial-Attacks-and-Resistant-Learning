@@ -97,10 +97,10 @@ def measure_resistance_on_test(net, loss_fn, test_dataset, to_attacks, plot_succ
     original_acc = trainer.measure_classification_accuracy(net, test_dataloader, device=device)
     for attack_class, attack_hp in to_attacks:
         attack = attack_class(net, loss_fn, attack_hp)
-        test_score, _ = attack.test_attack(test_dataloader,
-                                           main_title="{} + {}".format(attack.name, plots_title),
-                                           plot_successful_attacks=plot_successful_attacks,
-                                           device=device)
+        test_score = attack.test_attack(test_dataloader,
+                                        main_title="{} + {}".format(attack.name, plots_title),
+                                        plot_successful_attacks=plot_successful_attacks,
+                                        device=device)
         results["%{}".format(attack.name)] = test_score
 
     results["test_acc"] = original_acc
@@ -108,12 +108,13 @@ def measure_resistance_on_test(net, loss_fn, test_dataset, to_attacks, plot_succ
 
 
 def reset_net_parameters(model):
+    """ taken from: https://discuss.pytorch.org/t/reinitializing-the-weights-after-each-cross-validation-fold/11034/2?u=eldadperetz"""
     for layer in model.children():
         if hasattr(layer, 'reset_parameters'):
             layer.reset_parameters()
 
 
-def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, device=None):
+def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, device=None, train_attack=None):
     hps_gen.restart()
     net_best_hp, net_best_acc = None, 0
     while True:
@@ -129,7 +130,7 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
         nn_optimizer = torch.optim.Adam(net.parameters(), hp["lr"])
 
         # train network:
-        trainer.train_nn(net, nn_optimizer, loss_fn, train_dl, epochs, device=device)
+        trainer.train_nn(net, nn_optimizer, loss_fn, train_dl, epochs, device=device, attack=train_attack)
 
         # measure on validation set:
         net_acc = trainer.measure_classification_accuracy(net, val_dl, device=device)
@@ -138,10 +139,10 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
             net_best_hp = hp
 
     full_train_dl = DataLoader(train_dataset, batch_size=net_best_hp["batch_size"], shuffle=True)
-    reset_net_parameters(net)
+    # reset_net_parameters(net)
     epochs.restart()
     nn_optimizer = torch.optim.Adam(net.parameters(), net_best_hp["lr"])
-    trainer.train_nn(net, nn_optimizer, loss_fn, full_train_dl, epochs, device=device)
+    trainer.train_nn(net, nn_optimizer, loss_fn, full_train_dl, epochs, device=device, attack=train_attack)
     return net, net_best_hp, net_best_acc
 
 
@@ -150,23 +151,17 @@ def full_attack_of_trained_nn_with_hps(net, loss_fn, train_dataset, hps_gen, sel
     hps_gen.restart()
     train_dl, val_dl = dls.get_train_val_dls(train_dataset, selected_nn_hp["batch_size"])
 
-    best_attack, best_hp, best_score = None, None, 1
+    best_attack, best_hp, best_score = None, None, 1.0
     while True:
         hp = hps_gen.next()
         if hp is None:
             break
 
         attack = attack_method(net, loss_fn, hp)
-        score, _ = attack.test_attack(val_dl, plot_successful_attacks=plot_successful_attacks, device=device)
+        score = attack.test_attack(val_dl, plot_successful_attacks=plot_successful_attacks, device=device)
         if score <= best_score:  # lower score is better
             best_score = score
             best_hp = hp
             best_attack = attack
 
     return best_attack, best_hp, best_score
-
-
-# test
-if __name__ == '__main__':
-    imgs = (np.random.rand(10 * 64 * 64 * 3) * 256).reshape((10, 64, 64, 3)).astype(int)
-    show_img_lst(imgs)

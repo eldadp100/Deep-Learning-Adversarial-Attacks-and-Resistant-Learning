@@ -24,7 +24,7 @@ class Attack:
         :param plot_successful_attacks: plot original vs adv imgs with additional information
         :return: the attack score.
         """
-        # 1) calculate attack score
+        # calculate attack score
         self.net = self.net.to(device)
         num_successful_attacks = 0
         successful_attacks_details = []
@@ -69,7 +69,7 @@ class Attack:
                         ))
         attack_score = num_successful_attacks / len(dataloader.dataset)
 
-        # 2) Visualization of the attack results
+        # visualize attack results
         if plot_successful_attacks:
             to_plot_imgs = []
             to_plot_titles = []
@@ -80,50 +80,48 @@ class Attack:
                 to_plot_xlabels.extend(img_description[2])
             helper.show_img_lst(to_plot_imgs, to_plot_titles, to_plot_xlabels, main_title, columns=2)
 
-        return attack_score, constructed_examples
+        return attack_score
 
 
 class FGSM(Attack):
     def __init__(self, net, loss_fn, hp):
         """
-        :param steps: number of steps in FGSM algorithm.
-        :param epsilon: step size denoted as epsilon in the FGSM algorithm.
+        :param net:
+        :param loss_fn:
+        :param hp:
         """
         super().__init__(net, loss_fn)
         self.epsilon = hp["epsilon"]
         self.name = "fgsm"
 
     def perturb(self, X, y, device=None):
+        """
+        generates adversarial examples to given data points and labels (X, y) based on FGSM approach.
+        :param X:
+        :param y:
+        :param device:
+        :return:
+        """
+
         X.requires_grad = True
-        outputs = self.net(X)
+        y_pred = self.net(X)
 
         self.net.zero_grad()
-        loss = self.loss_fn(outputs, y).to(device)
+        loss = self.loss_fn(y_pred, y).to(device)
         loss.backward()
 
-        attack_images = X + self.epsilon * X.grad.sign()
-        attack_images = torch.clamp(attack_images, 0, 1)
+        adv_X = X + self.epsilon * X.grad.sign()
+        adv_X = torch.clamp(adv_X, 0, 1)
 
-        return attack_images
-
-        # """
-        # generates adversarial examples to given data points and labels (X, y) based on FGSM approach.
-        # """
-        # X_adv = torch.autograd.Variable(X, requires_grad=True).to(device)
-        # y_pred = self.net(X_adv)
-        # _loss = self.loss_fn(y_pred, y)
-        # _loss.backward(retain_graph=True)
-        # X_adv.retain_grad()
-        # with torch.no_grad():
-        #     X_adv += self.epsilon * torch.sign(X_adv.grad)
-        # return X_adv
+        return adv_X
 
 
 class PGD(Attack):
     def __init__(self, net, loss_fn, hp):
         """
-        :param steps: number of steps in FGSM algorithm.
-        :param epsilon: step size denoted as epsilon in the FGSM algorithm.
+        :param net:
+        :param loss_fn:
+        :param hp:
         """
         super().__init__(net, loss_fn)
         self.steps = hp["steps"]
@@ -134,33 +132,62 @@ class PGD(Attack):
     def perturb(self, X, y, device=None):
         """
         generates adversarial examples to given data points and labels (X, y) based on PGD approach.
+        :param X:
+        :param y:
+        :param device:
+        :return:
         """
+
         original_X = X
         for i in range(self.steps):
-            X.requires_grad = True
+            X.requires_grad_()
             outputs = self.net(X)
+            _loss = self.loss_fn(outputs, y).to(device)
+            _loss.backward()
 
-            self.net.zero_grad()
-            cost = self.loss_fn(outputs, y).to(device)
-            cost.backward()
+            X = X + self.alpha * X.grad.sign()
+            diff = torch.clamp(X - original_X, min=-self.epsilon, max=self.epsilon)  # gradient projection
+            X = torch.clamp(original_X + diff, min=0.0, max=1.0).detach_()  # to stay in image range [0,1]
 
-            adv_images = X + self.alpha * X.grad.sign()
-            eta = torch.clamp(adv_images - original_X, min=-self.epsilon, max=self.epsilon)
-            X = torch.clamp(original_X + eta, min=0, max=1).detach_()
-        #
-        # X_adv = torch.autograd.Variable(X, requires_grad=True).to(device)
-        # for j in range(self.steps):
-        #     y_pred = self.net(X_adv)
-        #     _loss = self.loss_fn(y_pred, y)
-        #     _loss.backward(retain_graph=True)
-        #     X_adv.retain_grad()
-        #     with torch.no_grad():
-        #         X_adv += self.epsilon * torch.sign(X_adv.grad)
-        #         # the projection:
-        #         Diff = torch.clamp(X_adv - X, -1, 1)  # l_inf projection on X (natural)
-        #         X_adv = X + Diff
-        #     if X_adv.grad is not None:
-        #         X_adv.grad.zero_()
-        #     X_adv.requires_grad_()
+        return X
+
+
+class MomentumFGSM(Attack):
+    """ Momentum Iterative Fast Gradient Sign Method (https://arxiv.org/pdf/1710.06081.pdf) """
+
+    def __init__(self, net, loss_fn, hp):
+        """
+        :param net:
+        :param loss_fn:
+        :param hp:
+        """
+        super().__init__(net, loss_fn)
+        self.steps = hp["steps"]
+        self.alpha = hp["alpha"]
+        self.momentum = hp["momentum"]
+        self.epsilon = hp["epsilon"]
+        self.name = "pgd"
+
+    def perturb(self, X, y, device=None):
+        """
+        generates adversarial examples to given data points and labels (X, y) based on PGD approach.
+        :param X:
+        :param y:
+        :param device:
+        :return:
+        """
+
+        original_X = X
+        accumulated_grad = None
+        for i in range(self.steps):
+            X.requires_grad_()
+            outputs = self.net(X)
+            _loss = self.loss_fn(outputs, y).to(device)
+            _loss.backward()
+
+            accumulated_grad = X.grad if accumulated_grad is None else self.momentum * accumulated_grad + (1.0 - self.momentum) * X.grad
+            X = X + self.alpha * accumulated_grad.sign()
+            diff = torch.clamp(X - original_X, min=-self.epsilon, max=self.epsilon)  # gradient projection
+            X = torch.clamp(original_X + diff, min=0.0, max=1.0).detach_()  # to stay in image range [0,1]
 
         return X

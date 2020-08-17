@@ -102,22 +102,21 @@ def train_nn(net, optimizer, loss_fn, dl, epochs: Epochs, attack=None, device=No
             if device is not None:
                 batch_data, batch_labels = batch_data.to(device), batch_labels.to(device)
 
-            # generate adversarial examples:
-            adversarial_batch_data = None
-            if attack is not None:
-                adversarial_batch_data = attack.perturb(batch_data, batch_labels,
-                                                        device=device)  # Danskin's Theorem applies here.
-
             # train on natural batch
-            if attack is None:  # TODO: maybe need to be done anyway? Theoretically not...
+            if attack is None:
+                if batch_num == 0: print("NATURAL")
                 batch_preds = net(batch_data)
                 _loss = loss_fn(batch_preds, batch_labels)
                 optimizer.zero_grad()
                 _loss.backward()
                 optimizer.step()
 
-            # train on the constructed adversarial examples
+            # train on the constructed adversarial examples (Adversarial Training)
             else:  # attack is not None
+                if batch_num == 0: print("ON ATTACK")
+                # generate adversarial examples:
+                adversarial_batch_data = attack.perturb(batch_data, batch_labels, device=device)
+                # train on adversarial examples - Danskin's Theorem
                 batch_preds = net(adversarial_batch_data)
                 _loss = loss_fn(batch_preds, batch_labels)
                 optimizer.zero_grad()
@@ -126,9 +125,9 @@ def train_nn(net, optimizer, loss_fn, dl, epochs: Epochs, attack=None, device=No
 
             # calculate batch measurements
             hard_batch_preds = torch.argmax(batch_preds, dim=1)
-            batch_num_currect = (hard_batch_preds == batch_labels).sum().type(torch.FloatTensor)
-            batch_acc = torch.div(batch_num_currect, len(batch_labels))
-            batch_information_mat.append([_loss.item(), batch_acc.item()])
+            batch_num_currect = (hard_batch_preds == batch_labels).sum().item()
+            batch_acc = batch_num_currect / len(batch_labels)
+            batch_information_mat.append([_loss.item(), batch_acc])
 
         # summarize epoch (should be a part of the log):
         batch_information_mat = torch.tensor(batch_information_mat)

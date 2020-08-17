@@ -48,11 +48,18 @@ class ConvNN(nn.Module):
                         conv_layers.append(nn.BatchNorm2d(channels_lst[i]))
 
                 conv_layers.append(params["activation"]())
+
+        out_channels = channels_lst[-1]
+        # if params["CNN_out_channels"] is not None:
+        #     conv_layers.append(nn.Conv2d(channels_lst[-1], params["CNN_out_channels"], 1))
+        #     conv_layers.append(params["activation"]())
+        #     out_channels = params["CNN_out_channels"]
+
         self.cnn = nn.Sequential(*conv_layers)
 
         lin_layers = []
         wh = params["in_wh"] // (2 ** (len(channels_lst) - 1))  # width and height of last layer output
-        lin_layer_width = channels_lst[-1] * (wh ** 2)
+        lin_layer_width = out_channels * (wh ** 2)
         for _ in range(params["#FC_Layers"] - 1):
             lin_layers.append(nn.Linear(lin_layer_width, lin_layer_width))
         lin_layers.append(nn.Linear(lin_layer_width, params["out_size"]))
@@ -137,8 +144,23 @@ class TrafficSignNet(nn.Module):
         )
 
     def forward(self, x):
-        x = self.stn(x)
+        # x = self.stn(x)
         x = self.cnn(x)
         x = x.view(-1, 100 * 4 * 4)
         x = self.lin(x)
         return x
+
+
+class SimpleConvNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=5)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=5)
+        self.fc1 = nn.Linear(1024, 10)
+
+    def forward(self, x):
+        x = F.relu(F.max_pool2d(self.conv1(x), 2))
+        x = F.relu(F.max_pool2d(self.conv2(x), 2))
+        x = x.view(-1, 1024)
+        x = self.fc1(x)
+        return F.log_softmax(x, dim=1)

@@ -3,13 +3,24 @@ from torch.optim import Adam, SGD
 from torch import nn
 import trainer
 from torchvision import transforms
+import os
+
+# paths
+data_root_dir = os.path.join(".", "data")
+checkpoints_folder = os.path.join(".", "checkpoints")
+results_folder = os.path.join(".", "results_folder")
+logger_path = os.path.join(results_folder, "log")
+plots_folder = os.path.join(results_folder, "plots")
 
 # general configurations:
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+save_checkpoints = True
+load_checkpoints = False  # To use a saved checkpoint instead re-training.
 seed = None  # Specify Random Seed. Helps to debug issues that appear seldom.
 imgs_to_show = 4  # maximal number images to show in a grid of images
 dls_num_workers = 1  # Dataloaders number of workers - 0 for loading using the main process
-plot_test_successful_attacks = False  # cannot be displayed in NOVA
+show_test_successful_attacks_plots = False  # cannot be displayed in NOVA
+save_test_successful_attacks_plots = True
 
 """
 The default split ratios in the proj. suppose we have N samples then:
@@ -29,7 +40,7 @@ TrafficSigns_experiments_configs = {
                              (0.2724, 0.2608, 0.2669))
     ]),
     "hps_construction_method": "grid",  # grid / random only.
-    "stopping_criteria": trainer.ConstantStopping(4),  # trainer.TimerStopping(10),  # trainer.ConstantStopping(5),
+    "stopping_criteria": trainer.ConstantStopping(5),  # trainer.TimerStopping(10),  # trainer.ConstantStopping(5),
     "loss_function": nn.CrossEntropyLoss(),  # the nets architectures are built based on CE loss
 }
 
@@ -39,7 +50,7 @@ TrafficSigns_experiments_hps = {
     },
 
     "PGD": {
-        "alpha": [2 / 255],  # [0.01, 0.001, 0.0001],
+        "alpha": [0.01],  # [0.01, 0.001, 0.0001],
         "steps": [40],
         "epsilon": [0.3]  # [5, 20, 40, 100]
     },
