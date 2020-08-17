@@ -13,14 +13,14 @@ logger_path = os.path.join(results_folder, "log")
 plots_folder = os.path.join(results_folder, "plots")
 
 # general configurations:
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 save_checkpoints = True
 load_checkpoints = False  # To use a saved checkpoint instead re-training.
-seed = None  # Specify Random Seed. Helps to debug issues that appear seldom.
-imgs_to_show = 4  # maximal number images to show in a grid of images
-dls_num_workers = 1  # Dataloaders number of workers - 0 for loading using the main process
 show_test_successful_attacks_plots = False  # cannot be displayed in NOVA
 save_test_successful_attacks_plots = True
+seed = None  # Specify Random Seed. Helps to debug issues that appear seldom.
+dls_num_workers = 1  # Dataloaders number of workers - 0 for loading using the main process
+imgs_to_show = 4  # maximal number images to show in a grid of images
+
 
 """
 The default split ratios in the proj. suppose we have N samples then:
@@ -40,6 +40,8 @@ TrafficSigns_experiments_configs = {
                              (0.2724, 0.2608, 0.2669))
     ]),
     "hps_construction_method": "grid",  # grid / random only.
+    "long_stopping_criteria": trainer.ConstantStopping(100),  # trainer.TimerStopping(10),  # trainer.ConstantStopping(5),
+    "short_stopping_criteria": trainer.ConstantStopping(10),  # trainer.TimerStopping(10),  # trainer.ConstantStopping(5),
     "stopping_criteria": trainer.ConstantStopping(5),  # trainer.TimerStopping(10),  # trainer.ConstantStopping(5),
     "loss_function": nn.CrossEntropyLoss(),  # the nets architectures are built based on CE loss
 }
@@ -56,8 +58,8 @@ TrafficSigns_experiments_hps = {
     },
 
     "nets_training": {
-        "lr": [0.001],  # [0.001, 0.0005, 0.01],
-        "batch_size": [128],
+        "lr": [0.1],  # [0.001, 0.0005, 0.01],
+        "batch_size": [256],
         # "optimizer": [torch.optim.SGD, torch.optim.Adam]
     },
 }

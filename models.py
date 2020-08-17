@@ -151,7 +151,7 @@ class TrafficSignNet(nn.Module):
         return x
 
 
-class SimpleConvNet(nn.Module):
+class MNISTNet(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=5)

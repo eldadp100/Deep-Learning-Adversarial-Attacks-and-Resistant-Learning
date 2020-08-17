@@ -50,6 +50,12 @@ if __name__ == '__main__':
     fgsm_attack_hps_gen = helper.GridSearch(experiment_hps_sets["FGSM"])
     pgd_attack_hps_gen = helper.GridSearch(experiment_hps_sets["PGD"])
 
+    # loss and general training componenets:
+    _loss_fn = experiment_configs["loss_function"]
+    long_stop_criteria = experiment_configs["long_stopping_criteria"]
+    short_stop_criteria = experiment_configs["short_stopping_criteria"]
+    short_epochs = trainer.Epochs(short_stop_criteria)
+    long_epochs = trainer.Epochs(long_stop_criteria)
 
 def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs,
                       net_name="", train_attack=None, load_checkpoint=False, save_checkpoint=True):
@@ -117,35 +123,35 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
     return res_dict
 
 
-if __name__ == '__main__x':
-    # define network and training components
-    net_arch = models.TrafficSignNet().to(device)
-    _loss_fn = experiment_configs["loss_function"]
-    stop_criteria = experiment_configs["stopping_criteria"]
-    epochs = trainer.Epochs(stop_criteria)
+run_experiment_1 = True
+run_experiment_2 = True
+run_experiment_3 = False
 
-    exp1_res_dict = experiment_1_func(net_arch, _loss_fn, _training_dataset, _testing_dataset, epochs,
+if __name__ == '__main__' and run_experiment_1:
+    # define network
+    net_arch = models.TrafficSignNet().to(device)
+    exp1_res_dict = experiment_1_func(net_arch, _loss_fn, _training_dataset, _testing_dataset, short_epochs,
                                       net_name="Spatial Transformer Network(STN)")
     original_trained_net = exp1_res_dict["trained_net"]
     net_hp = exp1_res_dict["net_hp"]
     fgsm_hp = exp1_res_dict["fgsm_hp"]
     pgd_hp = exp1_res_dict["pgd_hp"]
 
-if __name__ == '__main__x':
+if __name__ == '__main__' and run_experiment_2:
     # # Experiment 2: build a robust network
-    epochs = trainer.Epochs(trainer.ConstantStopping(25))
+    # epochs.restart()
     # fgsm_robust_net = models.TrafficSignNet().to(device)
     # fgsm_attack = attacks.FGSM(fgsm_robust_net, _loss_fn, fgsm_hp)
     # experiment_1_func(fgsm_robust_net, _loss_fn, _training_dataset, _testing_dataset, epochs,
     #                   net_name="robust net built using FGSM", train_attack=fgsm_attack)
 
-    epochs.restart()
+    long_epochs.restart()
     pgd_robust_net = models.TrafficSignNet().to(device)
     pgd_attack = attacks.PGD(pgd_robust_net, _loss_fn, pgd_hp)
-    experiment_1_func(pgd_robust_net, _loss_fn, _training_dataset, _testing_dataset, epochs,
+    experiment_1_func(pgd_robust_net, _loss_fn, _training_dataset, _testing_dataset, long_epochs,
                       net_name="robust net built using PGD", train_attack=pgd_attack)
 
-if __name__ == '__main__':
+if __name__ == '__main__' and run_experiment_3:
     # Experiment 3: Capacity and robustness
     _loss_fn = experiment_configs["loss_function"]
     stop_criteria = experiment_configs["stopping_criteria"]
@@ -162,10 +168,10 @@ if __name__ == '__main__':
         "#FC_Layers": 2,
         "CNN_out_channels": 30  # apply 1x1 conv layer to achieve that - to control mem. None to not use.
     }
-    for i in range(8):
-        base_net_params["channels_lst"] = [3, 2 ** (i + 1), 2 ** (i + 2)]
+    for i in range(1, 9):
+        base_net_params["channels_lst"] = [3, 10 * i, 20 * i]
         base_net_params["#FC_Layers"] = 1 + i // 2
-        base_net_params["CNN_out_channels"] = (i + 1) * 5
+        base_net_params["CNN_out_channels"] = i * 5
         cap_net = models.create_conv_nn(base_net_params)
         inc_capacity_nets.append(cap_net)
     for i, net in enumerate(inc_capacity_nets):

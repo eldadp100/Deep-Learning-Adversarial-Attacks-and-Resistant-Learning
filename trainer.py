@@ -101,10 +101,12 @@ def train_nn(net, optimizer, loss_fn, dl, epochs: Epochs, attack=None, device=No
         for batch_num, (batch_data, batch_labels) in enumerate(dl):
             if device is not None:
                 batch_data, batch_labels = batch_data.to(device), batch_labels.to(device)
+            if batch_num > 50:
+                break
 
             # train on natural batch
             if attack is None:
-                if batch_num == 0: print("NATURAL")
+                # if batch_num == 0: print("NATURAL")
                 batch_preds = net(batch_data)
                 _loss = loss_fn(batch_preds, batch_labels)
                 optimizer.zero_grad()
@@ -113,7 +115,7 @@ def train_nn(net, optimizer, loss_fn, dl, epochs: Epochs, attack=None, device=No
 
             # train on the constructed adversarial examples (Adversarial Training)
             else:  # attack is not None
-                if batch_num == 0: print("ON ATTACK")
+                # if batch_num == 0: print("ON ATTACK")
                 # generate adversarial examples:
                 adversarial_batch_data = attack.perturb(batch_data, batch_labels, device=device)
                 # train on adversarial examples - Danskin's Theorem
