@@ -2,8 +2,7 @@
     Data loaders file.
     every not standard dataset that is in use is implemented here.
 """
-import torch
-from torch.utils.data import DataLoader, Dataset, SubsetRandomSampler, Subset
+from torch.utils.data import DataLoader, Dataset, Subset
 import configs
 import numpy as np
 

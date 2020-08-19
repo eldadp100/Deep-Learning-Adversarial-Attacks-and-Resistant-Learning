@@ -124,11 +124,17 @@ class TrafficSignNet(nn.Module):
         self.stn = Stn()
         self.cnn = nn.Sequential(
             nn.Conv2d(in_channels, 100, 3, padding=1),  # 32
+            nn.ReLU(),
+            nn.Conv2d(100, 100, 3, padding=1),  # 32
+            nn.ReLU(),
+            nn.Dropout(0.1),
             nn.MaxPool2d(2, stride=2),  # 16
-            nn.ReLU(),
             nn.Conv2d(100, 200, 3, padding=1),  # 16
-            nn.MaxPool2d(2, stride=2),  # 8
             nn.ReLU(),
+            nn.Conv2d(200, 200, 3, padding=1),  # 16
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.MaxPool2d(2, stride=2),  # 8
             nn.Conv2d(200, 400, 5),  # 4
             nn.ReLU(),
             nn.Conv2d(400, 250, 3, padding=1),  # 4
@@ -154,13 +160,36 @@ class TrafficSignNet(nn.Module):
 class MNISTNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=5)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=5)
-        self.fc1 = nn.Linear(1024, 10)
+        self.cnn = nn.Sequential(
+            nn.Conv2d(1, 100, 3, padding=1),  # 28
+            nn.ReLU(),
+            nn.Conv2d(100, 100, 3, padding=1),  # 28
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.MaxPool2d(2, stride=2),  # 14
+            nn.Conv2d(100, 200, 3, padding=1),  # 14
+            nn.ReLU(),
+            nn.Conv2d(200, 200, 3, padding=1),  # 14
+            nn.Dropout(0.1),
+            nn.ReLU(),
+            nn.MaxPool2d(2, stride=2),  # 7
+            nn.Conv2d(200, 400, 5),  # 3
+            nn.ReLU(),
+            nn.Conv2d(400, 250, 3, padding=1),  # 3
+            nn.ReLU(),
+            nn.Conv2d(250, 100, 1),
+            nn.ReLU(),
+        )
+
+        self.lin = nn.Sequential(
+            nn.Linear(100 * 3 * 3, 350),
+            nn.Dropout(0.1),
+            nn.ReLU(),
+            nn.Linear(350, 10)
+        )
 
     def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2(x), 2))
-        x = x.view(-1, 1024)
-        x = self.fc1(x)
-        return F.log_softmax(x, dim=1)
+        x = self.cnn(x)
+        x = x.view(-1, 100 * 3 * 3)
+        x = self.lin(x)
+        return x

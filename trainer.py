@@ -21,7 +21,18 @@ class StoppingCriteria:
 
 
 class EarlyStopping(StoppingCriteria):
-    pass  # TODO: ...
+    def __init__(self, max_epochs_num):
+        """
+        :param max_epochs_num: number of epochs to stop after
+        """
+        super().__init__()
+        self.max_epochs_num = max_epochs_num
+
+    def stop(self):
+        return True if self.epoch_num >= self.max_epochs_num else False
+
+    def restart(self):
+        self.epoch_num = 0
 
 
 class ConstantStopping(StoppingCriteria):
@@ -84,7 +95,6 @@ class Epochs:
         self.stopping_criteria.restart()
 
 
-# TODO: should add log...
 def train_nn(net, optimizer, loss_fn, dl, epochs: Epochs, attack=None, device=None):
     """
     :param net: the network to train :)
@@ -101,26 +111,23 @@ def train_nn(net, optimizer, loss_fn, dl, epochs: Epochs, attack=None, device=No
         for batch_num, (batch_data, batch_labels) in enumerate(dl):
             if device is not None:
                 batch_data, batch_labels = batch_data.to(device), batch_labels.to(device)
-            if batch_num > 50:
-                break
 
             # train on natural batch
             if attack is None:
-                # if batch_num == 0: print("NATURAL")
                 batch_preds = net(batch_data)
                 _loss = loss_fn(batch_preds, batch_labels)
                 optimizer.zero_grad()
                 _loss.backward()
                 optimizer.step()
 
-            # train on the constructed adversarial examples (Adversarial Training)
-            else:  # attack is not None
-                # if batch_num == 0: print("ON ATTACK")
-                # generate adversarial examples:
+            # train on constructed adversarial examples (Adversarial Training Mode)
+            else:
+                with torch.no_grad():
+                    batch_preds = net(batch_data)  # evaluate on natural examples
+
                 adversarial_batch_data = attack.perturb(batch_data, batch_labels, device=device)
-                # train on adversarial examples - Danskin's Theorem
-                batch_preds = net(adversarial_batch_data)
-                _loss = loss_fn(batch_preds, batch_labels)
+                adversarial_batch_preds = net(adversarial_batch_data)
+                _loss = loss_fn(adversarial_batch_preds, batch_labels)
                 optimizer.zero_grad()
                 _loss.backward()
                 optimizer.step()
@@ -137,6 +144,7 @@ def train_nn(net, optimizer, loss_fn, dl, epochs: Epochs, attack=None, device=No
         curr_epoch_summary = {"acc": emp_acc, "loss": emp_loss}
         epochs.update(curr_epoch_summary)
         epochs.print_last_epoch_summary()
+    # epochs.view() # save/plot epochs improvement
 
 
 def measure_classification_accuracy(trained_net, dataloader: DataLoader, device=None):
