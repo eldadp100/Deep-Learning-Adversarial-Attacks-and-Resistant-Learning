@@ -9,8 +9,6 @@ import os
 data_root_dir = os.path.join(".", "data")
 checkpoints_folder = os.path.join(".", "checkpoints")
 results_folder = os.path.join(".", "results_folder")
-logger_path = os.path.join(results_folder, "log")
-plots_folder = os.path.join(results_folder, "plots")
 
 # general configurations:
 save_checkpoints = False
@@ -39,17 +37,16 @@ TrafficSigns_experiments_configs = {
                              (0.2724, 0.2608, 0.2669))
     ]),
     "hps_construction_method": "grid",  # grid / random only.
-    "adversarial_training_stopping_criteria": trainer.ConstantStopping(50),
-    "training_stopping_criteria": trainer.ConstantStopping(10),
+    "adversarial_training_stopping_criteria": trainer.ConstantStopping(7),
+    "training_stopping_criteria": trainer.ConstantStopping(2),
     # "stopping_criteria": trainer.ConstantStopping(5),  # trainer.TimerStopping(10),  # trainer.ConstantStopping(5),
     "loss_function": nn.CrossEntropyLoss(),  # the nets architectures are built based on CE loss
 }
 
 MNIST_experiments_configs = {
     "hps_construction_method": "grid",  # grid / random only.
-    "adversarial_training_stopping_criteria": trainer.ConstantStopping(15),
-    "training_stopping_criteria": trainer.ConstantStopping(5),
-    "stopping_criteria": trainer.ConstantStopping(5),
+    "adversarial_training_stopping_criteria": trainer.ConstantStopping(5),
+    "training_stopping_criteria": trainer.ConstantStopping(1),
     "loss_function": nn.CrossEntropyLoss(),  # the nets architectures are built based on CE loss
 }
 
@@ -65,7 +62,7 @@ TrafficSigns_experiments_hps = {
     },
 
     "nets_training": {
-        "lr": [0.001],  # [0.001, 0.0005, 0.01],
+        "lr": [0.0001],  # [0.001, 0.0005, 0.01],
         "batch_size": [256],
         # "optimizer": [torch.optim.SGD, torch.optim.Adam]
     },

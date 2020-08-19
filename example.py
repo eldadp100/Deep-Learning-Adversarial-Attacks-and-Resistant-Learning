@@ -17,19 +17,24 @@ if __name__ == '__main__':
     experiment_hps_sets = configs.TrafficSigns_experiments_hps
     show_test_successful_attacks_plots = configs.show_test_successful_attacks_plots
     save_test_successful_attacks_plots = configs.show_test_successful_attacks_plots
+    experiment_results_folder = os.path.join(configs.results_folder, "traffic_signs")
+    logger_path = os.path.join(experiment_results_folder, "log")
+    plots_folder = os.path.join(experiment_results_folder, "plots")
 
     # paths existence validation and initialization
     assert os.path.exists(configs.data_root_dir), "The dataset should be in ./data/GTSRB"
     assert os.path.exists(os.path.join(configs.data_root_dir, "GTSRB")), "The dataset should be in ./data/GTSRB"
     if not os.path.exists(configs.results_folder):
         os.mkdir(configs.results_folder)
+    if not os.path.exists(experiment_results_folder):
+        os.mkdir(experiment_results_folder)
     if not os.path.exists(configs.checkpoints_folder):
         os.mkdir(configs.checkpoints_folder)
-    if os.path.exists(configs.plots_folder):
-        shutil.rmtree(configs.plots_folder)
-        os.mkdir(configs.plots_folder)
-    if os.path.exists(configs.logger_path):
-        os.remove(configs.logger_path)
+    if os.path.exists(plots_folder):
+        shutil.rmtree(plots_folder)
+        os.mkdir(plots_folder)
+    if os.path.exists(logger_path):
+        os.remove(logger_path)
 
     # seed
     if configs.seed is not None:
@@ -91,12 +96,13 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
         # attack net using FGSM:
         res = helper.full_attack_of_trained_nn_with_hps(net, _loss_fn, _training_dataset, fgsm_attack_hps_gen, net_hp,
                                                         attacks.FGSM, device=device, plot_results=False,
-                                                        save_figs=False)
+                                                        save_figs=False, figs_path=plots_folder)
         fgsm_hp, fgsm_score = res  # unpack res
 
         # attack net using PGD:
         res = helper.full_attack_of_trained_nn_with_hps(net, _loss_fn, _training_dataset, pgd_attack_hps_gen, net_hp,
-                                                        attacks.PGD, device=device, plot_results=False, save_figs=False)
+                                                        attacks.PGD, device=device, plot_results=False, save_figs=False,
+                                                        figs_path=plots_folder)
         pgd_hp, pgd_score = res  # unpack res
 
         # measure attacks on test (holdout)
@@ -106,7 +112,7 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
                                                                device=device,
                                                                plot_results=show_test_successful_attacks_plots,
                                                                save_figs=save_test_successful_attacks_plots,
-                                                               figs_path=configs.plots_folder)
+                                                               figs_path=plots_folder)
 
     # unpack resistance_results
     test_acc = resistance_results["test_acc"]  # the accuracy without applying any attack
