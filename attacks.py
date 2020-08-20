@@ -6,6 +6,7 @@ import helper
 
 
 class Attack:
+    """ Abstract class to describe an attack. """
     def __init__(self, net, loss_fn):
         """
         :param net: the network to attack
@@ -16,6 +17,7 @@ class Attack:
         self.name = None
 
     def perturb(self, X, y, device=None):
+        """ generates adversarial examples to inputs (X, y) """
         pass
 
     def test_attack(self, dataloader, plot_results=True, save_results_figs=True, fig_path=None, main_title="",
@@ -92,23 +94,12 @@ class Attack:
 
 class FGSM(Attack):
     def __init__(self, net, loss_fn, hp):
-        """
-        :param net:
-        :param loss_fn:
-        :param hp:
-        """
         super().__init__(net, loss_fn)
         self.epsilon = hp["epsilon"]
         self.name = "fgsm"
 
     def perturb(self, X, y, device=None):
-        """
-        generates adversarial examples to given data points and labels (X, y) based on FGSM approach.
-        :param X:
-        :param y:
-        :param device:
-        :return:
-        """
+        """ generates adversarial examples to given data points and labels (X, y) based on FGSM approach. """
 
         X.requires_grad = True
         y_pred = self.net(X)
@@ -125,11 +116,6 @@ class FGSM(Attack):
 
 class PGD(Attack):
     def __init__(self, net, loss_fn, hp):
-        """
-        :param net:
-        :param loss_fn:
-        :param hp:
-        """
         super().__init__(net, loss_fn)
         self.steps = hp["steps"]
         self.alpha = hp["alpha"]
@@ -137,13 +123,7 @@ class PGD(Attack):
         self.name = "pgd"
 
     def perturb(self, X, y, device=None):
-        """
-        generates adversarial examples to given data points and labels (X, y) based on PGD approach.
-        :param X:
-        :param y:
-        :param device:
-        :return:
-        """
+        """ generates adversarial examples to given data points and labels (X, y) based on PGD approach. """
 
         original_X = X
         for i in range(self.steps):
@@ -176,13 +156,7 @@ class MomentumFGSM(Attack):
         self.name = "pgd"
 
     def perturb(self, X, y, device=None):
-        """
-        generates adversarial examples to given data points and labels (X, y) based on PGD approach.
-        :param X:
-        :param y:
-        :param device:
-        :return:
-        """
+        """ generates adversarial examples to given data points and labels (X, y) based on Momentum-FGSM approach. """
 
         original_X = X
         accumulated_grad = None

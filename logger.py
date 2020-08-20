@@ -1,3 +1,8 @@
+"""
+    logger.py saves a global logger instance that should be initialized at the code start point. Later then it can be
+    used in any file that import logger. Write msgs to both stdout and file + can disable stdout.
+"""
+
 import time
 from datetime import datetime
 
@@ -5,7 +10,6 @@ logger_instance = None
 
 
 class Logger:
-
     def __init__(self, log_path):
         self.log_path = log_path
         self.log_file = open(log_path, "w")

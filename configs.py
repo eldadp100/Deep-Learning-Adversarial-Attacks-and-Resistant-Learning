@@ -1,5 +1,3 @@
-import torch
-from torch.optim import Adam, SGD
 from torch import nn
 import trainer
 from torchvision import transforms
@@ -11,7 +9,7 @@ checkpoints_folder = os.path.join(".", "checkpoints")
 results_folder = os.path.join(".", "results_folder")
 
 # general configurations:
-save_checkpoints = True
+save_checkpoints = False
 load_checkpoints = False  # To use a saved checkpoint instead re-training.
 show_attacks_plots = False  # plots cannot be displayed in NOVA
 save_attacks_plots = True
@@ -37,8 +35,8 @@ TrafficSigns_experiments_configs = {
                              (0.2724, 0.2608, 0.2669))
     ]),
     "hps_construction_method": "grid",  # grid / random only.
-    "adversarial_training_stopping_criteria": trainer.ConstantStopping(7),
-    "training_stopping_criteria": trainer.ConstantStopping(2),
+    "adversarial_training_stopping_criteria": trainer.ConstantStopping(15),
+    "training_stopping_criteria": trainer.ConstantStopping(8),
     # "stopping_criteria": trainer.ConstantStopping(5),  # trainer.TimerStopping(10),  # trainer.ConstantStopping(5),
     "loss_function": nn.CrossEntropyLoss(),  # the nets architectures are built based on CE loss
 }
@@ -46,23 +44,23 @@ TrafficSigns_experiments_configs = {
 MNIST_experiments_configs = {
     "hps_construction_method": "grid",  # grid / random only.
     "adversarial_training_stopping_criteria": trainer.ConstantStopping(5),
-    "training_stopping_criteria": trainer.ConstantStopping(1),
+    "training_stopping_criteria": trainer.ConstantStopping(3),
     "loss_function": nn.CrossEntropyLoss(),  # the nets architectures are built based on CE loss
 }
 
 TrafficSigns_experiments_hps = {
     "FGSM": {
-        "epsilon": [0.007, 0.001, 0.1, 0.3],  # [0.01, 0.001, 0.0001],
+        "epsilon": [0.15],
     },
 
     "PGD": {
         "alpha": [0.01],  # [0.01, 0.001, 0.0001],
         "steps": [40],
-        "epsilon": [0.3]  # [5, 20, 40, 100]
+        "epsilon": [0.15]  # [5, 20, 40, 100]
     },
 
     "nets_training": {
-        "lr": [0.00005, 0.0001],  # [0.001, 0.0005, 0.01],
+        "lr": [0.0003, 0.0001],
         "batch_size": [64],
         # "optimizer": [torch.optim.SGD, torch.optim.Adam]
     },

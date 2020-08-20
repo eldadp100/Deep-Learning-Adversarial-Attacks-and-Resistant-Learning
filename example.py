@@ -13,7 +13,7 @@ import logger
 """
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/wolf/sagieb/course/miniconda3/lib/
 
-export CUDA_VISIBLE_DEVICES=7
+export CUDA_VISIBLE_DEVICES=5
 conda activate hw4_env
 cd SignsTrafficTest
 python example.py 
@@ -49,13 +49,20 @@ if __name__ == '__main__':
     if os.path.exists(logger_path):
         os.remove(logger_path)
 
+    # set logger
+    logger.init_log(logger_path)
+    logger.log_print("checkpoints folder: {}".format(experiment_checkpoints_folder))
+    logger.log_print("save checkpoints: {}".format(configs.save_checkpoints))
+    logger.log_print("load checkpoints: {}".format(configs.load_checkpoints))
+    logger.log_print("results folder: {}".format(experiment_results_folder))
+    logger.log_print("show results:  {}".format(configs.show_attacks_plots))
+    logger.log_print("save results:  {}".format(configs.save_attacks_plots))
+
     # seed
     if configs.seed is not None:
         # np.random.seed(configs.seed)
         torch.manual_seed(configs.seed)
-
-    # set logger
-    logger.init_log(logger_path)
+        logger.log_print("seed: {}".format(configs.seed))
 
     # set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -95,7 +102,8 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
     """
     if load_checkpoint:
         checkpoint_path = os.path.join(experiment_checkpoints_folder, "{}.pt".format(net_name))
-        checkpoint = torch.load(checkpoint_path)
+        logger.log_print("load network from {}".format(checkpoint_path))
+        checkpoint = torch.load(checkpoint_path, map_location=device)
         net.load_state_dict(checkpoint["trained_net"])
         net_hp = checkpoint["net_hp"]
         fgsm_hp = checkpoint["fgsm_hp"]
@@ -110,28 +118,32 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
         net.load_state_dict(net_state_dict)
         net.eval()  # from now on we only evaluate net.
 
+        logger.log_print("training selected hyperparams: {}".format(str(net_hp)))
+
         # attack selected net using FGSM:
         fgsm_hp, fgsm_score = helper.full_attack_of_trained_nn_with_hps(net, _loss_fn, _training_dataset,
                                                                         fgsm_attack_hps_gen, net_hp, attacks.FGSM,
                                                                         device=device, plot_results=False,
                                                                         save_figs=False, figs_path=plots_folder)
+        logger.log_print("FGSM attack selected hyperparams: {}".format(str(fgsm_hp)))
 
-        # attack selected net using PGD:
-        pgd_hp, pgd_score = helper.full_attack_of_trained_nn_with_hps(net, _loss_fn, _training_dataset,
-                                                                      pgd_attack_hps_gen, net_hp, attacks.PGD,
-                                                                      device=device, plot_results=False,
-                                                                      save_figs=False,
-                                                                      figs_path=plots_folder)
+    # attack selected net using PGD:
+    pgd_hp, pgd_score = helper.full_attack_of_trained_nn_with_hps(net, _loss_fn, _training_dataset,
+                                                                  pgd_attack_hps_gen, net_hp, attacks.PGD,
+                                                                  device=device, plot_results=False,
+                                                                  save_figs=False,
+                                                                  figs_path=plots_folder)
+    logger.log_print("PGD attack selected hyperparams: {}".format(str(pgd_hp)))
 
-        # measure attacks on test (holdout)
-        resistance_results = helper.measure_resistance_on_test(net, _loss_fn, _testing_dataset,
-                                                               to_attacks=[(attacks.FGSM, fgsm_hp),
-                                                                           (attacks.PGD, pgd_hp)],
-                                                               device=device,
-                                                               plot_results=show_plots,
-                                                               save_figs=save_plots,
-                                                               figs_path=plots_folder,
-                                                               plots_title=net_name)
+    # measure attacks on test (holdout)
+    resistance_results = helper.measure_resistance_on_test(net, _loss_fn, _testing_dataset,
+                                                           to_attacks=[(attacks.FGSM, fgsm_hp),
+                                                                       (attacks.PGD, pgd_hp)],
+                                                           device=device,
+                                                           plot_results=show_plots,
+                                                           save_figs=save_plots,
+                                                           figs_path=plots_folder,
+                                                           plots_title=net_name)
 
     # unpack resistance_results
     test_acc = resistance_results["test_acc"]  # the accuracy without applying any attack
@@ -139,10 +151,10 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
     pgd_res = resistance_results["%pgd"]
 
     # print scores:
-    print("TEST SCORES of {}:".format(net_name))
-    print("accuracy on test:            {}".format(test_acc))
-    print("%FGSM successful attacks:    {}".format(fgsm_res))
-    print("%PGD successful attacks:     {}\n".format(pgd_res))
+    logger.log_print("TEST SCORES of {}:".format(net_name))
+    logger.log_print("accuracy on test:            {}".format(test_acc))
+    logger.log_print("%FGSM successful attacks:    {}".format(fgsm_res))
+    logger.log_print("%PGD successful attacks:     {}".format(pgd_res))
 
     # save checkpoint
     res_dict = {
@@ -157,6 +169,7 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
         to_save_res_dict = res_dict
         to_save_res_dict["trained_net"] = net.state_dict()
         checkpoint_path = os.path.join(experiment_checkpoints_folder, "{}.pt".format(net_name))
+        logger.log_print("save network to {}".format(checkpoint_path))
         torch.save(to_save_res_dict, checkpoint_path)
 
     return res_dict
@@ -164,13 +177,16 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
 
 run_experiment_1 = True
 run_experiment_2 = True
-run_experiment_3 = False
+run_experiment_3 = True
 
 if __name__ == '__main__' and run_experiment_1:
+    net_name = "STN (Spatial Transformer Network)"
+    logger.log_print("\n")
+    logger.log_print("Experiment 1 on {}".format(net_name))
     # define network
     original_net = models.TrafficSignNet().to(device)
     exp1_res_dict = experiment_1_func(original_net, _loss_fn, _training_dataset, _testing_dataset, epochs,
-                                      net_name="STN (Spatial Transformer Network)",
+                                      net_name=net_name,
                                       save_checkpoint=configs.save_checkpoints,
                                       load_checkpoint=configs.load_checkpoints,
                                       show_plots=configs.show_attacks_plots,
@@ -203,8 +219,10 @@ def experiment_2_func(exp1_res_dict, net_arch, _loss_fn, _training_dataset, _tes
 
 # Experiment 2: Build robust networks + Compare PGD and FGSM adversarial trainings
 if __name__ == '__main__' and run_experiment_2:
+    logger.log_print("\n")
+    logger.log_print("Experiment 2 on {}".format(net_name))
     experiment_2_func(exp1_res_dict, models.TrafficSignNet, _loss_fn, _training_dataset, _testing_dataset, adv_epochs,
-                      net_name="STN (Spatial Transformer Network)",
+                      net_name=net_name,
                       save_checkpoint=configs.save_checkpoints,
                       load_checkpoint=configs.load_checkpoints,
                       show_plots=configs.show_attacks_plots,
@@ -222,11 +240,12 @@ if __name__ == '__main__' and run_experiment_3:
     }
 
     for i in range(1, 10):
-        if i == 1:
-            base_net_params["channels_lst"] = [3, 1]
-            base_net_params["#FC_Layers"] = 1
+        if 1 <= i <= 3:
+            base_net_params["channels_lst"] = [3, 3 ** i]
+            base_net_params["#FC_Layers"] = 0
             base_net_params["CNN_out_channels"] = None
-        if 2 <= i <= 4:
+
+        if 3 <= i <= 4:
             base_net_params["channels_lst"] = [3, 1 * i, 2 * i]
             base_net_params["#FC_Layers"] = 1
             base_net_params["CNN_out_channels"] = None

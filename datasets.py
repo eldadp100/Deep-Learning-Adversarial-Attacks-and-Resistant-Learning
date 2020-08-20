@@ -39,6 +39,7 @@ class GTSRB(Dataset):
 
 
 def get_data_labels(dataset: Dataset):
+    """ split dataset into tensor of data inputs and thier labels"""
     inputs = []
     targets = []
     for i in range(len(dataset)):

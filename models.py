@@ -121,40 +121,74 @@ class Stn(nn.Module):
 class TrafficSignNet(nn.Module):
     def __init__(self, in_channels=3, out_channels=43):
         super().__init__()
-        self.stn = Stn()
         self.cnn = nn.Sequential(
-            nn.Conv2d(in_channels, 100, 3, padding=1),  # 32
-            nn.ReLU(),
-            nn.Conv2d(100, 100, 3, padding=1),  # 32
+            nn.Conv2d(in_channels, 50, 3, padding=1, stride=2),  # 32
             nn.ReLU(),
             nn.Dropout(0.1),
-            nn.MaxPool2d(2, stride=2),  # 16
-            nn.Conv2d(100, 200, 3, padding=1),  # 16
-            nn.ReLU(),
-            nn.Conv2d(200, 200, 3, padding=1),  # 16
+            # nn.MaxPool2d(2, stride=2),  # 16
+            nn.Conv2d(50, 100, 3, padding=1, stride=2),  # 16
             nn.ReLU(),
             nn.Dropout(0.1),
-            nn.MaxPool2d(2, stride=2),  # 8
-            nn.Conv2d(200, 400, 5),  # 4
+            # nn.MaxPool2d(2, stride=2),  # 8
+            nn.Conv2d(100, 150, 5),  # 4
             nn.ReLU(),
-            nn.Conv2d(400, 250, 3, padding=1),  # 4
+            nn.Conv2d(150, 75, 3, padding=1),  # 4
             nn.ReLU(),
-            nn.Conv2d(250, 100, 1),
+            nn.Conv2d(75, 50, 1),
             nn.ReLU(),
         )
 
         self.lin = nn.Sequential(
-            nn.Linear(100 * 4 * 4, 350),
+            nn.Linear(50 * 4 * 4, 200),
             nn.ReLU(),
-            nn.Linear(350, out_channels)
+            nn.Linear(200, out_channels)
         )
 
     def forward(self, x):
-        # x = self.stn(x)
         x = self.cnn(x)
-        x = x.view(-1, 100 * 4 * 4)
+        x = x.view(-1, 50 * 4 * 4)
         x = self.lin(x)
         return x
+
+
+# class TrafficSignNet(nn.Module):
+#     def __init__(self, in_channels=3, out_channels=43):
+#         super().__init__()
+#         # self.stn = Stn()
+#         self.cnn = nn.Sequential(
+#             nn.Conv2d(in_channels, 100, 3, padding=1),  # 32
+#             nn.ReLU(),
+#             nn.Conv2d(100, 100, 3, padding=1),  # 32
+#             nn.ReLU(),
+#             nn.Dropout(0.2),
+#             nn.MaxPool2d(2, stride=2),  # 16
+#             nn.Conv2d(100, 200, 3, padding=1),  # 16
+#             nn.ReLU(),
+#             nn.Conv2d(200, 200, 3, padding=1),  # 16
+#             nn.ReLU(),
+#             nn.Dropout(0.1),
+#             nn.MaxPool2d(2, stride=2),  # 8
+#             nn.Conv2d(200, 400, 5),  # 4
+#             nn.ReLU(),
+#             nn.Conv2d(400, 250, 3, padding=1),  # 4
+#             nn.ReLU(),
+#             nn.Conv2d(250, 100, 1),
+#             nn.ReLU(),
+#         )
+#
+#         self.lin = nn.Sequential(
+#             nn.Linear(100 * 4 * 4, 350),
+#             nn.ReLU(),
+#             nn.Linear(350, out_channels)
+#         )
+#
+#     def forward(self, x):
+#         # x = self.stn(x)
+#         x = self.cnn(x)
+#         x = x.view(-1, 100 * 4 * 4)
+#         x = self.lin(x)
+#         return x
+#
 
 
 class MNISTNet(nn.Module):

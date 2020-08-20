@@ -4,42 +4,37 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 import dls
+import logger
 import trainer
 import matplotlib
+import configs
 
-matplotlib.use('Agg')
+if not configs.show_attacks_plots:
+    matplotlib.use('Agg')
 
 
-def show_img_lst(imgs, titles=None, x_labels=None, main_title=None, columns=2, plot_img=True, save_img=True,
+def show_img_lst(imgs, titles=None, x_labels=None, main_title=None, columns=2, plot_img=False, save_img=False,
                  save_path=None):
     """
-
-    :param imgs:
-    :param titles:
-    :param x_labels:
-    :param main_title:
-    :param columns:
-    :param plot_img:
-    :param save_img:
-    :param save_path:
-    :return:
+    Show / save a grid of images (imgs). below each there is a corresponding title / xlabel description - or None
+    to ignore this option.
+    :param main_title: title of the whole image (above the imgs grid).
+    :param columns: number of imgs in each row of the grid. The #rows determined from #columns value.
+    :param plot_img: use plt.show?
+    :param save_img: use plt.savefig?
+    :param save_path: path to save the figure. path to save image. if save_img=True then save_path cannot be None.
     """
+
     if save_img:
         assert save_path is not None
 
-    # if len(imgs) == 0:
-    #     img = torch.rand((28, 28, 3))
-    #     plt.imshow(img.detach())
-    #     plt.savefig(save_path)
-    #     return
-
     # plot images
     img_shape = imgs[0].shape
-    fig = plt.figure()
+    fig = plt.figure(figsize=(10, 20))
     rows = np.ceil(len(imgs) / columns)
     for i in range(len(imgs)):
-        fig.add_subplot(rows, columns, i + 1)
-        img = imgs[i].detach()
+        fig.add_subplot(2 * rows, columns, 2 * i + 1 if i % 2 == 0 else 2 * i)
+        img = imgs[i].detach().cpu()
         # fix img
         if img_shape[0] == 1:
             img = img[0]
@@ -94,7 +89,7 @@ class HyperparamsGen:
 class GridSearch(HyperparamsGen):
     """
         Goes over all possible combinations of hps (hyperparameters).
-        Implemented as a generator to save memory - crucial when there are many hps.
+        Implemented as a generator to save memory - critical when there are many hps.
     """
 
     def __init__(self, hps_dict):
@@ -124,23 +119,17 @@ class GridSearch(HyperparamsGen):
         return hp
 
     def restart(self):
+        """ restarts generator to re-use it in hps search """
         self.indices = [0] * len(self.hps_keys)
 
 
 def measure_resistance_on_test(net, loss_fn, test_dataset, to_attacks, device=None, plots_title="", plot_results=False,
                                save_figs=False, figs_path=None):
     """
-    :param net:
-    :param loss_fn:
-    :param test_dataset:
-    :param to_attacks:
-    :param plot_results: plot successful attacks
-    :param plots_title:
-    :param device:
-    :param save_figs:
-    :param figs_path:
-    :return:
+    measure the trained net resistance to the specified attacks (to_attacks) on test dataset. has option
+    to save / plot the successful attacks.
     """
+
     results = {}
     test_dataloader = DataLoader(test_dataset, batch_size=100)
     original_acc = trainer.measure_classification_accuracy(net, test_dataloader, device=device)
@@ -160,6 +149,7 @@ def measure_resistance_on_test(net, loss_fn, test_dataset, to_attacks, device=No
 
 
 def weight_reset(m):
+    """ restarts network parameters - use net.apply(weight_reset). """
     if isinstance(m, torch.nn.Conv2d) or isinstance(m, torch.nn.Linear):
         m.reset_parameters()
 
@@ -167,14 +157,17 @@ def weight_reset(m):
 def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, device=None, train_attack=None,
                               full_train=False):
     """
-    cross validation hyperparameter search.
-    :param net:
-    :param loss_fn:
-    :param train_dataset:
-    :param hps_gen:
-    :param epochs:
-    :param device:
-    :param train_attack:
+    Here we do hyperparameter search to find best training hyperparameter.
+    Apply cross validation training and measuring on the hyperparameters and choose the one with best validation measurements.
+    Enables to train as adversarial training by specifying train_attack.
+
+    :param net: net to train (its parameters will be initialized)
+    :param loss_fn: loss function.
+    :param train_dataset: dataset to train on.
+    :param hps_gen: hyperparameter generator - HyperparamsGen type. we iterate on this object.
+    :param epochs: Epochs object to manage stopping methodology.
+    :param device: the device to execute on.
+    :param train_attack: in case we do an adversarial training. Its hp (parameters) should be given also (tuple).
     :param full_train: train the net on all dataset on the selected hyperparameter.
     :return: net, net_best_hp, net_best_acc. net is trained on full train dataset (not splitted)
     """
@@ -185,6 +178,7 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
             hp = hps_gen.next()
             if hp is None:
                 break
+            logger.log_print("\nTesting: {}".format(str(hp)))
 
             # restart previous execution
             net.apply(weight_reset)
@@ -207,6 +201,7 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
         net_best_hp = hps_gen.next()
 
     if full_train or hps_gen.size() == 1:
+        logger.log_print("\nFull Train(training on all training dataset) with selected hp: {}".format(str(net_best_hp)))
         epochs.restart()
         net.apply(weight_reset)
         full_train_dl = DataLoader(train_dataset, batch_size=net_best_hp["batch_size"], shuffle=True)
@@ -221,23 +216,24 @@ def full_attack_of_trained_nn_with_hps(net, loss_fn, train_dataset, hps_gen, sel
                                        plots_title="", plot_results=False, save_figs=False, figs_path=None):
     """
     hyperparameter search in order to find the hp with highest attack score (i.e. prob to successfully attack).
-    :param net:
-    :param loss_fn:
-    :param train_dataset:
-    :param hps_gen:
-    :param selected_nn_hp:
-    :param attack_method:
-    :param device:
-    :param plots_title:
-    :param plot_results:
-    :param save_figs:
-    :param figs_path:
+    :param net: net to train (its parameters will be initialized)
+    :param loss_fn: loss function.
+    :param train_dataset: dataset to train on.
+    :param hps_gen: hyperparameter generator - HyperparamsGen type. we iterate on this object.
+    :param selected_nn_hp: selected hyperparameter from training hyperparameter search section.
+    :param attack_method: of Attack type. we choose the hp that maximizes this attack score.
+    :param device: device to execute on.
+    :param plots_title: title of the plots
+    :param plot_results: use plt.show()?
+    :param save_figs: use plt.savefig(...)?
+    if both plot_results and save_figs we don't construct the grid view of the successful adversarial examples.
+    :param figs_path: where to save the figure.
     :return: best_hp, best_score (approximately prob to successfully attack)
     """
     hps_gen.restart()
     train_dl, val_dl = dls.get_train_val_dls(train_dataset, selected_nn_hp["batch_size"])
 
-    best_hp, best_score = None, 1.0
+    best_hp, best_score = None, 0.0
     while True:
         hp = hps_gen.next()
         if hp is None:
@@ -253,8 +249,10 @@ def full_attack_of_trained_nn_with_hps(net, loss_fn, train_dataset, hps_gen, sel
             fig_path=os.path.join(figs_path, title),
             device=device
         )
-        if score <= best_score:  # lower score is better
+        if score >= best_score:
             best_score = score
             best_hp = hp
+
+        logger.log_print("%successful attacks: {} with hp: {}".format(score, str(hp)))
 
     return best_hp, best_score

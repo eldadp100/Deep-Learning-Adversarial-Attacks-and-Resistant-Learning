@@ -179,32 +179,37 @@ if __name__ == '__main__' and run_experiment_1:
 
 
 # Build robust network with PGD and FGSM and compare them
-def experiment_2_func(exp1_res_dict, net_arch, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
+def experiment_2_func(exp1_res_dict, net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
                       net_name="", load_checkpoint=False, save_checkpoint=False, show_plots=False, save_plots=False):
     net_hp = exp1_res_dict["net_hp"]
     fgsm_hp = exp1_res_dict["fgsm_hp"]
     pgd_hp = exp1_res_dict["pgd_hp"]
+    pgd_res, fgsm_res = None, None
 
     # adversarial_epochs.restart()
-    # fgsm_robust_net = net_arch().to(device)
+    # net.apply(helper.weight_reset)
+    # fgsm_robust_net = net.to(device)
     # fgsm_attack = attacks.FGSM(fgsm_robust_net, _loss_fn, fgsm_hp)
-    # experiment_1_func(fgsm_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
+    # fgsm_res = experiment_1_func(fgsm_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
     #                   net_name="{} with FGSM adversarial training".format(net_name), train_attack=fgsm_attack,
     #                   load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
     #                   save_plots=save_plots)
 
     adversarial_epochs.restart()
-    pgd_robust_net = net_arch().to(device)
+    net.apply(helper.weight_reset)
+    pgd_robust_net = net.to(device)
     pgd_attack = attacks.PGD(pgd_robust_net, _loss_fn, pgd_hp)
-    experiment_1_func(pgd_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
-                      net_name="{} with PGD adversarial training".format(net_name), train_attack=pgd_attack,
-                      load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
-                      save_plots=save_plots)
+    pgd_res = experiment_1_func(pgd_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
+                                net_name="{} with PGD adversarial training".format(net_name), train_attack=pgd_attack,
+                                load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
+                                save_plots=save_plots)
+
+    return fgsm_res, pgd_res
 
 
 # Experiment 2: Build robust networks + Compare PGD and FGSM adversarial trainings
 if __name__ == '__main__' and run_experiment_2:
-    experiment_2_func(exp1_res_dict, models.MNISTNet, _loss_fn, _training_dataset, _testing_dataset, adv_epochs,
+    experiment_2_func(exp1_res_dict, models.MNISTNet(), _loss_fn, _training_dataset, _testing_dataset, adv_epochs,
                       net_name="STN (Spatial Transformer Network)",
                       save_checkpoint=configs.save_checkpoints,
                       load_checkpoint=configs.load_checkpoints,
@@ -247,6 +252,7 @@ if __name__ == '__main__' and run_experiment_3:
     for i, net in enumerate(inc_capacity_nets):
         net = net.to(device)
         epochs.restart()
-        experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs, net_name="capacity_{}".format(i))
-
-    # plot results
+        exp1 = experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs,
+                                 net_name="capacity_{}".format(i))
+        experiment_2_func(exp1, net, _loss_fn, _training_dataset, _testing_dataset, adv_epochs,
+                          net_name="capacity_{}".format(i))
