@@ -1,13 +1,23 @@
+import time
 import torch
 import attacks
 import configs
 import datasets
-import dls
 import helper
 import models
 import trainer
 import os
 import shutil
+import logger
+
+"""
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/wolf/sagieb/course/miniconda3/lib/
+
+export CUDA_VISIBLE_DEVICES=7
+conda activate hw4_env
+cd SignsTrafficTest
+python example.py 
+"""
 
 if __name__ == '__main__':
     # Experiment 1: attack network
@@ -15,10 +25,10 @@ if __name__ == '__main__':
     # configs
     experiment_configs = configs.TrafficSigns_experiments_configs
     experiment_hps_sets = configs.TrafficSigns_experiments_hps
-    show_test_successful_attacks_plots = configs.show_test_successful_attacks_plots
-    save_test_successful_attacks_plots = configs.show_test_successful_attacks_plots
     experiment_results_folder = os.path.join(configs.results_folder, "traffic_signs")
-    logger_path = os.path.join(experiment_results_folder, "log")
+    experiment_checkpoints_folder = os.path.join(configs.checkpoints_folder, "traffic_signs")
+
+    logger_path = os.path.join(experiment_results_folder, "log.txt")
     plots_folder = os.path.join(experiment_results_folder, "plots")
 
     # paths existence validation and initialization
@@ -29,10 +39,13 @@ if __name__ == '__main__':
     if not os.path.exists(experiment_results_folder):
         os.mkdir(experiment_results_folder)
     if not os.path.exists(configs.checkpoints_folder):
-        os.mkdir(configs.checkpoints_folder)
+        os.mkdir(experiment_results_folder)
+    if not os.path.exists(experiment_checkpoints_folder):
+        os.mkdir(experiment_checkpoints_folder)
     if os.path.exists(plots_folder):
         shutil.rmtree(plots_folder)
-        os.mkdir(plots_folder)
+        time.sleep(.0001)
+    os.mkdir(plots_folder)
     if os.path.exists(logger_path):
         os.remove(logger_path)
 
@@ -41,9 +54,12 @@ if __name__ == '__main__':
         # np.random.seed(configs.seed)
         torch.manual_seed(configs.seed)
 
+    # set logger
+    logger.init_log(logger_path)
+
     # set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(device)
+    logger.log_print("execution device: {}".format(device))
 
     # get datasets
     transform = experiment_configs["data_transform"]
@@ -64,7 +80,7 @@ if __name__ == '__main__':
 
 
 def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs, net_name="", train_attack=None,
-                      load_checkpoint=False, save_checkpoint=False):
+                      load_checkpoint=False, save_checkpoint=False, show_plots=False, save_plots=False):
     """
     :param net:
     :param _loss_fn:
@@ -78,7 +94,7 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
     :return:
     """
     if load_checkpoint:
-        checkpoint_path = os.path.join(configs.checkpoints_folder, "{}.pt".format(net_name))
+        checkpoint_path = os.path.join(experiment_checkpoints_folder, "{}.pt".format(net_name))
         checkpoint = torch.load(checkpoint_path)
         net.load_state_dict(checkpoint["trained_net"])
         net_hp = checkpoint["net_hp"]
@@ -87,32 +103,35 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
         resistance_results = checkpoint["resistance_results"]
 
     else:
-        # apply hyperparameters-search to get trained network
-        res = helper.full_train_of_nn_with_hps(net, _loss_fn, _training_dataset, net_training_hps_gen, epochs,
-                                               device=device, train_attack=train_attack)
-        net, net_hp, net_acc = res  # unpack res
-        net.eval()
+        # apply hyperparameters-search to get a trained network
+        net_state_dict, net_hp = helper.full_train_of_nn_with_hps(net, _loss_fn, _training_dataset,
+                                                                  net_training_hps_gen, epochs, device=device,
+                                                                  train_attack=train_attack)
+        net.load_state_dict(net_state_dict)
+        net.eval()  # from now on we only evaluate net.
 
-        # attack net using FGSM:
-        res = helper.full_attack_of_trained_nn_with_hps(net, _loss_fn, _training_dataset, fgsm_attack_hps_gen, net_hp,
-                                                        attacks.FGSM, device=device, plot_results=False,
-                                                        save_figs=False, figs_path=plots_folder)
-        fgsm_hp, fgsm_score = res  # unpack res
+        # attack selected net using FGSM:
+        fgsm_hp, fgsm_score = helper.full_attack_of_trained_nn_with_hps(net, _loss_fn, _training_dataset,
+                                                                        fgsm_attack_hps_gen, net_hp, attacks.FGSM,
+                                                                        device=device, plot_results=False,
+                                                                        save_figs=False, figs_path=plots_folder)
 
-        # attack net using PGD:
-        res = helper.full_attack_of_trained_nn_with_hps(net, _loss_fn, _training_dataset, pgd_attack_hps_gen, net_hp,
-                                                        attacks.PGD, device=device, plot_results=False, save_figs=False,
-                                                        figs_path=plots_folder)
-        pgd_hp, pgd_score = res  # unpack res
+        # attack selected net using PGD:
+        pgd_hp, pgd_score = helper.full_attack_of_trained_nn_with_hps(net, _loss_fn, _training_dataset,
+                                                                      pgd_attack_hps_gen, net_hp, attacks.PGD,
+                                                                      device=device, plot_results=False,
+                                                                      save_figs=False,
+                                                                      figs_path=plots_folder)
 
         # measure attacks on test (holdout)
         resistance_results = helper.measure_resistance_on_test(net, _loss_fn, _testing_dataset,
-                                                               [(attacks.FGSM, fgsm_hp),
-                                                                (attacks.PGD, pgd_hp)],
+                                                               to_attacks=[(attacks.FGSM, fgsm_hp),
+                                                                           (attacks.PGD, pgd_hp)],
                                                                device=device,
-                                                               plot_results=show_test_successful_attacks_plots,
-                                                               save_figs=save_test_successful_attacks_plots,
-                                                               figs_path=plots_folder)
+                                                               plot_results=show_plots,
+                                                               save_figs=save_plots,
+                                                               figs_path=plots_folder,
+                                                               plots_title=net_name)
 
     # unpack resistance_results
     test_acc = resistance_results["test_acc"]  # the accuracy without applying any attack
@@ -134,10 +153,10 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
         "resistance_results": resistance_results
     }
 
-    if save_checkpoint:
+    if save_checkpoint and not load_checkpoint:
         to_save_res_dict = res_dict
         to_save_res_dict["trained_net"] = net.state_dict()
-        checkpoint_path = os.path.join(configs.checkpoints_folder, "{}.pt".format(net_name))
+        checkpoint_path = os.path.join(experiment_checkpoints_folder, "{}.pt".format(net_name))
         torch.save(to_save_res_dict, checkpoint_path)
 
     return res_dict
@@ -151,43 +170,75 @@ if __name__ == '__main__' and run_experiment_1:
     # define network
     original_net = models.TrafficSignNet().to(device)
     exp1_res_dict = experiment_1_func(original_net, _loss_fn, _training_dataset, _testing_dataset, epochs,
-                                      net_name="STN (Spatial Transformer Network)")
-    original_trained_net = exp1_res_dict["trained_net"]
+                                      net_name="STN (Spatial Transformer Network)",
+                                      save_checkpoint=configs.save_checkpoints,
+                                      load_checkpoint=configs.load_checkpoints,
+                                      show_plots=configs.show_attacks_plots,
+                                      save_plots=configs.save_attacks_plots)
+
+
+# Build robust network with PGD and FGSM and compare them
+def experiment_2_func(exp1_res_dict, net_arch, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
+                      net_name="", load_checkpoint=False, save_checkpoint=False, show_plots=False, save_plots=False):
     net_hp = exp1_res_dict["net_hp"]
     fgsm_hp = exp1_res_dict["fgsm_hp"]
     pgd_hp = exp1_res_dict["pgd_hp"]
 
-if __name__ == '__main__' and run_experiment_2:
-    # # Experiment 2: build a robust network
-    # adv_epochs.restart()
-    # fgsm_robust_net = models.TrafficSignNet().to(device)
+    # adversarial_epochs.restart()
+    # fgsm_robust_net = net_arch().to(device)
     # fgsm_attack = attacks.FGSM(fgsm_robust_net, _loss_fn, fgsm_hp)
-    # experiment_1_func(fgsm_robust_net, _loss_fn, _training_dataset, _testing_dataset, adv_epochs,
-    #                   net_name="STN with FGSM adversarial training", train_attack=fgsm_attack)
+    # experiment_1_func(fgsm_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
+    #                   net_name="{} with FGSM adversarial training".format(net_name), train_attack=fgsm_attack,
+    #                   load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
+    #                   save_plots=save_plots)
 
-    adv_epochs.restart()
-    pgd_robust_net = models.TrafficSignNet().to(device)
+    adversarial_epochs.restart()
+    pgd_robust_net = net_arch().to(device)
     pgd_attack = attacks.PGD(pgd_robust_net, _loss_fn, pgd_hp)
-    experiment_1_func(pgd_robust_net, _loss_fn, _training_dataset, _testing_dataset, adv_epochs,
-                      net_name="STN with PGD adversarial training", train_attack=pgd_attack)
+    experiment_1_func(pgd_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
+                      net_name="{} with PGD adversarial training".format(net_name), train_attack=pgd_attack,
+                      load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
+                      save_plots=save_plots)
+
+
+# Experiment 2: Build robust networks + Compare PGD and FGSM adversarial trainings
+if __name__ == '__main__' and run_experiment_2:
+    experiment_2_func(exp1_res_dict, models.TrafficSignNet, _loss_fn, _training_dataset, _testing_dataset, adv_epochs,
+                      net_name="STN (Spatial Transformer Network)",
+                      save_checkpoint=configs.save_checkpoints,
+                      load_checkpoint=configs.load_checkpoints,
+                      show_plots=configs.show_attacks_plots,
+                      save_plots=configs.save_attacks_plots)
 
 if __name__ == '__main__' and run_experiment_3:
     # Experiment 3: Capacity and robustness
     inc_capacity_nets = []
     base_net_params = {
-        "channels_lst": [3, 20, 40],  # the first element is number of input channels
         "extras_blocks_components": [],  # ["dropout"],
         # "p_dropout": 0.1,
         "activation": torch.nn.LeakyReLU,
         "out_size": 43,
-        "in_wh": 32,
-        "#FC_Layers": 2,
-        "CNN_out_channels": 30  # apply 1x1 conv layer to achieve that - to control mem. None to not use.
+        "in_wh": 32
     }
-    for i in range(1, 9):
-        base_net_params["channels_lst"] = [3, 10 * i, 20 * i]
-        base_net_params["#FC_Layers"] = 1 + i // 2
-        base_net_params["CNN_out_channels"] = i * 5
+
+    for i in range(1, 10):
+        if i == 1:
+            base_net_params["channels_lst"] = [3, 1]
+            base_net_params["#FC_Layers"] = 1
+            base_net_params["CNN_out_channels"] = None
+        if 2 <= i <= 4:
+            base_net_params["channels_lst"] = [3, 1 * i, 2 * i]
+            base_net_params["#FC_Layers"] = 1
+            base_net_params["CNN_out_channels"] = None
+        if 5 <= i <= 8:
+            base_net_params["channels_lst"] = [3, 3 * i, 6 * i]
+            base_net_params["#FC_Layers"] = 2
+            base_net_params["CNN_out_channels"] = 4 * i
+        if i == 9:
+            base_net_params["channels_lst"] = [3, 100, 200, 70]
+            base_net_params["#FC_Layers"] = 4
+            base_net_params["CNN_out_channels"] = 40
+
         cap_net = models.create_conv_nn(base_net_params)
         inc_capacity_nets.append(cap_net)
 
@@ -195,7 +246,6 @@ if __name__ == '__main__' and run_experiment_3:
     for i, net in enumerate(inc_capacity_nets):
         net = net.to(device)
         epochs.restart()
-        experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs,
-                          net_name="capacity_{}".format(i))
+        experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs, net_name="capacity_{}".format(i))
 
     # plot results

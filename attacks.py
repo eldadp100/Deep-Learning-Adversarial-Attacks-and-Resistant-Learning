@@ -1,3 +1,5 @@
+import os
+
 import torch
 import configs
 import helper
@@ -16,7 +18,7 @@ class Attack:
     def perturb(self, X, y, device=None):
         pass
 
-    def test_attack(self, dataloader, plot_results=True, save_results_figs=True, figs_path=None, main_title="",
+    def test_attack(self, dataloader, plot_results=True, save_results_figs=True, fig_path=None, main_title="",
                     device=None):
         """
         the attack score of attack method A on network <net> is E[A(x) != y] over distribution D when A(x) is the
@@ -80,8 +82,10 @@ class Attack:
                 to_plot_imgs.extend(img_description[0])
                 to_plot_titles.extend(img_description[1])
                 to_plot_xlabels.extend(img_description[2])
-            helper.show_img_lst(to_plot_imgs, to_plot_titles, to_plot_xlabels, main_title, columns=2,
-                                plot_img=plot_results, save_img=save_results_figs, save_path=figs_path)
+
+            if len(to_plot_imgs) > 0:
+                helper.show_img_lst(to_plot_imgs, to_plot_titles, to_plot_xlabels, main_title, columns=2,
+                                    plot_img=plot_results, save_img=save_results_figs, save_path=fig_path)
 
         return attack_score
 

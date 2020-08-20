@@ -5,6 +5,9 @@ import torch
 from torch.utils.data import DataLoader
 import dls
 import trainer
+import matplotlib
+
+matplotlib.use('Agg')
 
 
 def show_img_lst(imgs, titles=None, x_labels=None, main_title=None, columns=2, plot_img=True, save_img=True,
@@ -23,6 +26,12 @@ def show_img_lst(imgs, titles=None, x_labels=None, main_title=None, columns=2, p
     """
     if save_img:
         assert save_path is not None
+
+    # if len(imgs) == 0:
+    #     img = torch.rand((28, 28, 3))
+    #     plt.imshow(img.detach())
+    #     plt.savefig(save_path)
+    #     return
 
     # plot images
     img_shape = imgs[0].shape
@@ -110,7 +119,7 @@ class GridSearch(HyperparamsGen):
         while i >= 0 and self.indices[i] == self.values_size[i]:
             self.indices[i] = 0
             i -= 1
-        self.indices[max(0, i)] += 1
+        self.indices[max(0, i)] += 1 if i >= 0 else self.values_size[0] + 1
 
         return hp
 
@@ -137,12 +146,12 @@ def measure_resistance_on_test(net, loss_fn, test_dataset, to_attacks, device=No
     original_acc = trainer.measure_classification_accuracy(net, test_dataloader, device=device)
     for attack_class, attack_hp in to_attacks:
         attack = attack_class(net, loss_fn, attack_hp)
-        title = "resistance {}: {}".format(attack.name, plots_title)
+        title = "{}_{}".format(attack.name, plots_title)
         test_score = attack.test_attack(test_dataloader,
                                         main_title=title,
                                         plot_results=plot_results,
                                         save_results_figs=save_figs,
-                                        figs_path=os.path.join(figs_path, title),
+                                        fig_path=os.path.join(figs_path, "{}.png".format(title)),
                                         device=device)
         results["%{}".format(attack.name)] = test_score
 
@@ -150,14 +159,13 @@ def measure_resistance_on_test(net, loss_fn, test_dataset, to_attacks, device=No
     return results
 
 
-def reset_net_parameters(model):
-    """ taken from: https://discuss.pytorch.org/t/reinitializing-the-weights-after-each-cross-validation-fold/11034/2?u=eldadperetz"""
-    for layer in model.children():
-        if hasattr(layer, 'reset_parameters'):
-            layer.reset_parameters()
+def weight_reset(m):
+    if isinstance(m, torch.nn.Conv2d) or isinstance(m, torch.nn.Linear):
+        m.reset_parameters()
 
 
-def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, device=None, train_attack=None):
+def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, device=None, train_attack=None,
+                              full_train=False):
     """
     cross validation hyperparameter search.
     :param net:
@@ -167,42 +175,46 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
     :param epochs:
     :param device:
     :param train_attack:
+    :param full_train: train the net on all dataset on the selected hyperparameter.
     :return: net, net_best_hp, net_best_acc. net is trained on full train dataset (not splitted)
     """
     hps_gen.restart()
+    best_net_state_dict, net_best_hp, net_best_acc = None, None, 0
     if hps_gen.size() > 1:
-        net_best_hp, net_best_acc = None, 0
         while True:
             hp = hps_gen.next()
             if hp is None:
                 break
 
             # restart previous execution
-            reset_net_parameters(net)
+            net.apply(weight_reset)
             epochs.restart()
 
             # set train and val dataloaders, optimizer
             train_dl, val_dl = dls.get_train_val_dls(train_dataset, hp["batch_size"])
             nn_optimizer = torch.optim.Adam(net.parameters(), hp["lr"])
 
-            # train network:
+            # train network
             trainer.train_nn(net, nn_optimizer, loss_fn, train_dl, epochs, device=device, attack=train_attack)
 
-            # measure on validation set:
+            # measure on validation set
             net_acc = trainer.measure_classification_accuracy(net, val_dl, device=device)
             if net_acc >= net_best_acc:
                 net_best_acc = net_acc
                 net_best_hp = hp
+                best_net_state_dict = net.state_dict()
     else:
         net_best_hp = hps_gen.next()
-        net_best_acc = None
 
-    full_train_dl = DataLoader(train_dataset, batch_size=net_best_hp["batch_size"], shuffle=True)
-    # reset_net_parameters(net)
-    epochs.restart()
-    nn_optimizer = torch.optim.Adam(net.parameters(), net_best_hp["lr"])
-    trainer.train_nn(net, nn_optimizer, loss_fn, full_train_dl, epochs, device=device, attack=train_attack)
-    return net, net_best_hp, net_best_acc
+    if full_train or hps_gen.size() == 1:
+        epochs.restart()
+        net.apply(weight_reset)
+        full_train_dl = DataLoader(train_dataset, batch_size=net_best_hp["batch_size"], shuffle=True)
+        nn_optimizer = torch.optim.Adam(net.parameters(), net_best_hp["lr"])
+        trainer.train_nn(net, nn_optimizer, loss_fn, full_train_dl, epochs, device=device, attack=train_attack)
+        best_net_state_dict = net.state_dict()
+
+    return best_net_state_dict, net_best_hp
 
 
 def full_attack_of_trained_nn_with_hps(net, loss_fn, train_dataset, hps_gen, selected_nn_hp, attack_method, device=None,
@@ -238,7 +250,7 @@ def full_attack_of_trained_nn_with_hps(net, loss_fn, train_dataset, hps_gen, sel
             main_title=title,
             plot_results=plot_results,
             save_results_figs=save_figs,
-            figs_path=os.path.join(figs_path, title),
+            fig_path=os.path.join(figs_path, title),
             device=device
         )
         if score <= best_score:  # lower score is better
