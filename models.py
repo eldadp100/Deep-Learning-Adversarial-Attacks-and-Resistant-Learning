@@ -118,17 +118,19 @@ class Stn(nn.Module):
         return x
 
 
-class TrafficSignNet(nn.Module):
+class CNNTrafficSignNet(nn.Module):
+    name = "CNN-TrafficSignNet"
+
     def __init__(self, in_channels=3, out_channels=43):
         super().__init__()
         self.cnn = nn.Sequential(
             nn.Conv2d(in_channels, 50, 3, padding=1, stride=2),  # 32
             nn.ReLU(),
-            nn.Dropout(0.1),
+            nn.Dropout(0.05),
             # nn.MaxPool2d(2, stride=2),  # 16
             nn.Conv2d(50, 100, 3, padding=1, stride=2),  # 16
             nn.ReLU(),
-            nn.Dropout(0.1),
+            nn.Dropout(0.05),
             # nn.MaxPool2d(2, stride=2),  # 8
             nn.Conv2d(100, 150, 5),  # 4
             nn.ReLU(),
@@ -139,9 +141,10 @@ class TrafficSignNet(nn.Module):
         )
 
         self.lin = nn.Sequential(
-            nn.Linear(50 * 4 * 4, 200),
+            nn.Linear(50 * 4 * 4, 100),
             nn.ReLU(),
-            nn.Linear(200, out_channels)
+            # nn.Dropout(0.1),
+            nn.Linear(100, out_channels)
         )
 
     def forward(self, x):
@@ -151,47 +154,50 @@ class TrafficSignNet(nn.Module):
         return x
 
 
-# class TrafficSignNet(nn.Module):
-#     def __init__(self, in_channels=3, out_channels=43):
-#         super().__init__()
-#         # self.stn = Stn()
-#         self.cnn = nn.Sequential(
-#             nn.Conv2d(in_channels, 100, 3, padding=1),  # 32
-#             nn.ReLU(),
-#             nn.Conv2d(100, 100, 3, padding=1),  # 32
-#             nn.ReLU(),
-#             nn.Dropout(0.2),
-#             nn.MaxPool2d(2, stride=2),  # 16
-#             nn.Conv2d(100, 200, 3, padding=1),  # 16
-#             nn.ReLU(),
-#             nn.Conv2d(200, 200, 3, padding=1),  # 16
-#             nn.ReLU(),
-#             nn.Dropout(0.1),
-#             nn.MaxPool2d(2, stride=2),  # 8
-#             nn.Conv2d(200, 400, 5),  # 4
-#             nn.ReLU(),
-#             nn.Conv2d(400, 250, 3, padding=1),  # 4
-#             nn.ReLU(),
-#             nn.Conv2d(250, 100, 1),
-#             nn.ReLU(),
-#         )
-#
-#         self.lin = nn.Sequential(
-#             nn.Linear(100 * 4 * 4, 350),
-#             nn.ReLU(),
-#             nn.Linear(350, out_channels)
-#         )
-#
-#     def forward(self, x):
-#         # x = self.stn(x)
-#         x = self.cnn(x)
-#         x = x.view(-1, 100 * 4 * 4)
-#         x = self.lin(x)
-#         return x
-#
+class STNTrafficSignNet(nn.Module):
+    name = "STN-TrafficSignNet"
+
+    def __init__(self, in_channels=3, out_channels=43):
+        super().__init__()
+        self.stn = Stn()
+        self.cnn = nn.Sequential(
+            nn.Conv2d(in_channels, 100, 3, padding=1),  # 32
+            nn.ReLU(),
+            nn.Conv2d(100, 100, 3, padding=1),  # 32
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.MaxPool2d(2, stride=2),  # 16
+            nn.Conv2d(100, 200, 3, padding=1),  # 16
+            nn.ReLU(),
+            nn.Conv2d(200, 200, 3, padding=1),  # 16
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.MaxPool2d(2, stride=2),  # 8
+            nn.Conv2d(200, 400, 5),  # 4
+            nn.ReLU(),
+            nn.Conv2d(400, 250, 3, padding=1),  # 4
+            nn.ReLU(),
+            nn.Conv2d(250, 100, 1),
+            nn.ReLU(),
+        )
+
+        self.lin = nn.Sequential(
+            nn.Linear(100 * 4 * 4, 350),
+            nn.ReLU(),
+            nn.Linear(350, out_channels)
+        )
+
+    def forward(self, x):
+        x = self.stn(x)
+        x = self.cnn(x)
+        x = x.view(-1, 100 * 4 * 4)
+        x = self.lin(x)
+        return x
 
 
 class MNISTNet(nn.Module):
+    name = "MNIST-NET"
+
     def __init__(self):
         super().__init__()
         self.cnn = nn.Sequential(
@@ -223,6 +229,92 @@ class MNISTNet(nn.Module):
         )
 
     def forward(self, x):
+        x = self.cnn(x)
+        x = x.view(-1, 100 * 3 * 3)
+        x = self.lin(x)
+        return x
+
+
+
+
+
+
+
+
+
+
+class STN1D(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # Spatial transformer localization-network
+        self.localization = nn.Sequential(
+            nn.Conv2d(1, 8, kernel_size=7),
+            nn.MaxPool2d(2, stride=2),
+            nn.ReLU(True),
+            nn.Conv2d(8, 10, kernel_size=5),
+            nn.MaxPool2d(2, stride=2),
+            nn.ReLU(True)
+        )
+
+        # Regressor for the 3 * 2 affine matrix
+        self.fc_loc = nn.Sequential(
+            nn.Linear(10 * 3 * 3, 32),
+            nn.ReLU(True),
+            nn.Linear(32, 3 * 2)
+        )
+
+        # Initialize the weights/bias with identity transformation
+        self.fc_loc[2].weight.data.zero_()
+        self.fc_loc[2].bias.data.copy_(torch.tensor([1, 0, 0, 0, 1, 0], dtype=torch.float))
+
+    # Spatial transformer network forward function
+    def forward(self, x):
+        xs = self.localization(x)
+        xs = xs.view(-1, 10 * 3 * 3)
+        theta = self.fc_loc(xs)
+        theta = theta.view(-1, 2, 3)
+
+        grid = F.affine_grid(theta, x.size())
+        x = F.grid_sample(x, grid)
+
+        return x
+
+class STN_MNISTNet(nn.Module):
+    name = "MNIST-NET"
+
+    def __init__(self):
+        super().__init__()
+        self.stn = STN1D()
+        self.cnn = nn.Sequential(
+            nn.Conv2d(1, 100, 3, padding=1),  # 28
+            nn.ReLU(),
+            nn.Conv2d(100, 100, 3, padding=1),  # 28
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.MaxPool2d(2, stride=2),  # 14
+            nn.Conv2d(100, 200, 3, padding=1),  # 14
+            nn.ReLU(),
+            nn.Conv2d(200, 200, 3, padding=1),  # 14
+            nn.Dropout(0.1),
+            nn.ReLU(),
+            nn.MaxPool2d(2, stride=2),  # 7
+            nn.Conv2d(200, 400, 5),  # 3
+            nn.ReLU(),
+            nn.Conv2d(400, 250, 3, padding=1),  # 3
+            nn.ReLU(),
+            nn.Conv2d(250, 100, 1),
+            nn.ReLU(),
+        )
+
+        self.lin = nn.Sequential(
+            nn.Linear(100 * 3 * 3, 350),
+            nn.Dropout(0.1),
+            nn.ReLU(),
+            nn.Linear(350, 10)
+        )
+
+    def forward(self, x):
+        x = self.stn(x)
         x = self.cnn(x)
         x = x.view(-1, 100 * 3 * 3)
         x = self.lin(x)

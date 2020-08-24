@@ -123,6 +123,18 @@ class GridSearch(HyperparamsGen):
         self.indices = [0] * len(self.hps_keys)
 
 
+def concat_hps_gens(hps1: HyperparamsGen, hps2: HyperparamsGen):
+    concat_hps_dict = {}
+    concat_hps_dict.update(hps1.hps_dict)
+    concat_hps_dict.update(hps2.hps_dict)
+
+    return hps1.__class__(concat_hps_dict)
+
+
+def hps_search(hp_gen: HyperparamsGen, func, *params):
+    pass
+
+
 def measure_resistance_on_test(net, loss_fn, test_dataset, to_attacks, device=None, plots_title="", plot_results=False,
                                save_figs=False, figs_path=None):
     """
@@ -136,13 +148,13 @@ def measure_resistance_on_test(net, loss_fn, test_dataset, to_attacks, device=No
     for attack_class, attack_hp in to_attacks:
         attack = attack_class(net, loss_fn, attack_hp)
         title = "{}_{}".format(attack.name, plots_title)
-        test_score = attack.test_attack(test_dataloader,
+        test_acc = attack.test_attack(test_dataloader,
                                         main_title=title,
                                         plot_results=plot_results,
                                         save_results_figs=save_figs,
                                         fig_path=os.path.join(figs_path, "{}.png".format(title)),
                                         device=device)
-        results["%{}".format(attack.name)] = test_score
+        results["%{}".format(attack.name)] = test_acc
 
     results["test_acc"] = original_acc
     return results
@@ -155,7 +167,7 @@ def weight_reset(m):
 
 
 def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, device=None, train_attack=None,
-                              full_train=False):
+                              full_train=False, show_validation=False):
     """
     Here we do hyperparameter search to find best training hyperparameter.
     Apply cross validation training and measuring on the hyperparameters and choose the one with best validation measurements.
@@ -171,9 +183,13 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
     :param full_train: train the net on all dataset on the selected hyperparameter.
     :return: net, net_best_hp, net_best_acc. net is trained on full train dataset (not splitted)
     """
+    early_stop = isinstance(epochs, trainer.EarlyStopping)
+    if early_stop:
+        full_train = False  # equivalent
+
     hps_gen.restart()
     best_net_state_dict, net_best_hp, net_best_acc = None, None, 0
-    if hps_gen.size() > 1:
+    if hps_gen.size() > 1 or (hps_gen.size() == 1 and early_stop):
         while True:
             hp = hps_gen.next()
             if hp is None:
@@ -189,10 +205,19 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
             nn_optimizer = torch.optim.Adam(net.parameters(), hp["lr"])
 
             # train network
-            trainer.train_nn(net, nn_optimizer, loss_fn, train_dl, epochs, device=device, attack=train_attack)
+            _val_dl = None
+            if show_validation or early_stop:
+                _val_dl = val_dl
+            # define attack using hp
+            attack_obj = None
+            if train_attack is not None:
+                attack_obj = train_attack(net, loss_fn, hp)
+            trainer.train_nn(net, nn_optimizer, loss_fn, train_dl, epochs, device=device, attack=attack_obj,
+                             val_dl=_val_dl)
 
             # measure on validation set
             net_acc = trainer.measure_classification_accuracy(net, val_dl, device=device)
+            logger.log_print("hp {} with val acc: {}".format(str(hp), net_acc))
             if net_acc >= net_best_acc:
                 net_best_acc = net_acc
                 net_best_hp = hp
@@ -200,13 +225,16 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
     else:
         net_best_hp = hps_gen.next()
 
-    if full_train or hps_gen.size() == 1:
+    if full_train or (hps_gen.size() == 1 and not early_stop):
         logger.log_print("\nFull Train(training on all training dataset) with selected hp: {}".format(str(net_best_hp)))
         epochs.restart()
         net.apply(weight_reset)
         full_train_dl = DataLoader(train_dataset, batch_size=net_best_hp["batch_size"], shuffle=True)
         nn_optimizer = torch.optim.Adam(net.parameters(), net_best_hp["lr"])
-        trainer.train_nn(net, nn_optimizer, loss_fn, full_train_dl, epochs, device=device, attack=train_attack)
+        attack_obj = None
+        if train_attack is not None:
+            attack_obj = train_attack(net, loss_fn, net_best_hp)
+        trainer.train_nn(net, nn_optimizer, loss_fn, full_train_dl, epochs, device=device, attack=attack_obj)
         best_net_state_dict = net.state_dict()
 
     return best_net_state_dict, net_best_hp
@@ -233,7 +261,7 @@ def full_attack_of_trained_nn_with_hps(net, loss_fn, train_dataset, hps_gen, sel
     hps_gen.restart()
     train_dl, val_dl = dls.get_train_val_dls(train_dataset, selected_nn_hp["batch_size"])
 
-    best_hp, best_score = None, 0.0
+    best_hp, lowest_acc = None, 1.0
     while True:
         hp = hps_gen.next()
         if hp is None:
@@ -241,7 +269,7 @@ def full_attack_of_trained_nn_with_hps(net, loss_fn, train_dataset, hps_gen, sel
 
         attack = attack_method(net, loss_fn, hp)
         title = "resistance {}: {}".format(attack.name, plots_title)
-        score = attack.test_attack(
+        acc_on_attack = attack.test_attack(
             val_dl,
             main_title=title,
             plot_results=plot_results,
@@ -249,10 +277,31 @@ def full_attack_of_trained_nn_with_hps(net, loss_fn, train_dataset, hps_gen, sel
             fig_path=os.path.join(figs_path, title),
             device=device
         )
-        if score >= best_score:
-            best_score = score
+        if acc_on_attack <= lowest_acc:
+            lowest_acc = acc_on_attack
             best_hp = hp
 
-        logger.log_print("%successful attacks: {} with hp: {}".format(score, str(hp)))
+        logger.log_print("%accuracy on attack: {} with hp: {}".format(acc_on_attack, str(hp)))
 
-    return best_hp, best_score
+    return best_hp, lowest_acc
+
+#
+# import torch.multiprocessing as mp
+#
+# num_processes = 4
+#
+#
+# def init_mp(_dataloader):
+#     # global dataloader
+#     dataloader = _dataloader
+#
+#
+# def parallel_hps_search(hps_gen, func, net, dl):
+#     net.share_memory()
+#     processes_pool = mp.Pool(num_processes, initializer=init_mp, initargs=(dl,))
+#     while True:
+#         hp = hps_gen.next()
+#         if hp is None:
+#             break
+#         logger.log_print("\nTesting: {}".format(str(hp)))
+#         processes_pool.apply(func, args=(net, .., hp))

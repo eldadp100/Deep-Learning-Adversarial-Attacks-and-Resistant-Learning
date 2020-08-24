@@ -34,6 +34,13 @@ class Logger:
     def flush(self):
         self.log_file.flush()
 
+    def new_section(self):
+        self.log_file.write("\n" * 3)
+
+    # def close(self):
+    #     self.log_print("Logger Terminated")
+    #     self.log_file.close()
+
 
 def init_log(log_path):
     global logger_instance
@@ -43,6 +50,9 @@ def init_log(log_path):
 def log_print(msg):
     assert logger_instance is not None, "should initialize logger before using it. use init_log"
     logger_instance.log_print(msg)
+
+def new_section():
+    logger_instance.new_section()
 
 
 def enable_stdout_prints():
@@ -55,3 +65,8 @@ def disable_stdout_prints():
 
 def flush():
     logger_instance.flush()
+
+#
+# def close():
+#     if logger_instance is not None:
+#         logger_instance.close()

@@ -1,12 +1,9 @@
-import os
-
 import torch
 import configs
 import helper
 
 
 class Attack:
-    """ Abstract class to describe an attack. """
     def __init__(self, net, loss_fn):
         """
         :param net: the network to attack
@@ -27,7 +24,7 @@ class Attack:
         constructed adversarial example of attack A on x. We are going to estimate it using samples from test_dataset.
 
         :param plot_results: plot original vs adv imgs with additional information
-        :return: the attack score.
+        :return: the accuracy on constructed adversarial examples (i.e. 1 - attack score).
         """
         # calculate attack score
         self.net = self.net.to(device)  # move network to device
@@ -43,7 +40,7 @@ class Attack:
             hard_y_preds = torch.argmax(y_preds, dim=1)
             adv_y_preds = self.net(constructed_examples)
             hard_adv_y_preds = torch.argmax(adv_y_preds, dim=1)
-            batch_successful_attack = (hard_adv_y_preds != hard_y_preds)
+            batch_successful_attack = (hard_adv_y_preds != ys)
             num_successful_attacks += batch_successful_attack.sum().item()
 
             # update successful attacks details to plot
@@ -73,7 +70,10 @@ class Attack:
                             ],
                             main_title  # main title
                         ))
-        attack_score = num_successful_attacks / len(dataloader.dataset)
+
+        dataloader_size = len(dataloader) * dataloader.batch_size
+        attack_score = num_successful_attacks / dataloader_size
+        acc_on_constructed_examples = 1.0 - attack_score
 
         # visualize attack results
         if plot_results or save_results_figs:
@@ -89,7 +89,7 @@ class Attack:
                 helper.show_img_lst(to_plot_imgs, to_plot_titles, to_plot_xlabels, main_title, columns=2,
                                     plot_img=plot_results, save_img=save_results_figs, save_path=fig_path)
 
-        return attack_score
+        return acc_on_constructed_examples
 
 
 class FGSM(Attack):

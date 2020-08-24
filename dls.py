@@ -2,7 +2,7 @@
     Data loaders file.
     every not standard dataset that is in use is implemented here.
 """
-from torch.utils.data import DataLoader, Dataset, Subset
+from torch.utils.data import DataLoader, Dataset, Subset, SubsetRandomSampler
 import configs
 import numpy as np
 
@@ -20,10 +20,10 @@ def get_train_val_dls(dataset: Dataset, batch_size):
     val_split_idx = int(ds_size * configs.val_ratio)
     train_indices, val_indices = indices[:val_split_idx], indices[val_split_idx:]
 
-    train_subset = Subset(dataset, train_indices)
-    val_subset = Subset(dataset, val_indices)
-    train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True)
-    validation_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=True)
+    # train_subset = Subset(dataset, train_indices)
+    # val_subset = Subset(dataset, val_indices)
+    train_loader = DataLoader(dataset, batch_size=batch_size, sampler=SubsetRandomSampler(train_indices))
+    validation_loader = DataLoader(dataset, batch_size=batch_size, sampler=SubsetRandomSampler(val_indices))
 
     return train_loader, validation_loader
 

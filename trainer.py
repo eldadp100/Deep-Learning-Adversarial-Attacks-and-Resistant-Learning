@@ -189,4 +189,5 @@ def measure_classification_accuracy(trained_net, dataloader: DataLoader, device=
         ys_pred = trained_net(xs)
         hard_ys_pred = torch.argmax(ys_pred, dim=1)
         correct_classified += (ys == hard_ys_pred).sum().item()
-    return correct_classified / len(dataloader.dataset)
+    dataloader_size = len(dataloader) * dataloader.batch_size
+    return correct_classified / dataloader_size

@@ -1,0 +1,194 @@
+Time passed [minutes]: 0.00.     execution date (d/m/y): 23/08/2020, 19:57:08
+Time passed [minutes]: 0.02.     execution device: cuda
+Time passed [minutes]: 0.21.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 0.44.     Epoch 1. Train accuracy: 0.84,  Train loss:  0.56
+
+Time passed [minutes]: 0.65.     Epoch 2. Train accuracy: 0.92,  Train loss:  0.28
+
+Time passed [minutes]: 0.85.     Epoch 3. Train accuracy: 0.93,  Train loss:  0.23
+
+Time passed [minutes]: 1.06.     Epoch 4. Train accuracy: 0.94,  Train loss:  0.20
+
+Time passed [minutes]: 1.29.     Epoch 5. Train accuracy: 0.95,  Train loss:  0.18
+
+Time passed [minutes]: 1.29.     training selected hyperparams: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 1.34.     %accuracy on attack: 0.004986702127659615 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 1.34.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 1.65.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 40, 'epsilon': 0.3}
+Time passed [minutes]: 2.34.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 2.52.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 20, 'epsilon': 0.3}
+Time passed [minutes]: 2.64.     %accuracy on attack: 0.1723182624113475 with hp: {'alpha': 0.01, 'steps': 7, 'epsilon': 0.3}
+Time passed [minutes]: 2.64.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 20, 'epsilon': 0.3}
+Time passed [minutes]: 2.83.     TEST SCORES of capacity_1:
+Time passed [minutes]: 2.83.     accuracy on test:                         0.9499
+Time passed [minutes]: 2.83.     accuracy on FGSM constructed examples:    0.0021999999999999797
+Time passed [minutes]: 2.83.     accuracy on PGD constructed examples:     9.999999999998899e-05
+Time passed [minutes]: 2.83.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 3.06.     Epoch 1. Train accuracy: 0.89,  Train loss:  0.39
+
+Time passed [minutes]: 3.27.     Epoch 2. Train accuracy: 0.96,  Train loss:  0.14
+
+Time passed [minutes]: 3.47.     Epoch 3. Train accuracy: 0.97,  Train loss:  0.11
+
+Time passed [minutes]: 3.71.     Epoch 4. Train accuracy: 0.97,  Train loss:  0.09
+
+Time passed [minutes]: 3.92.     Epoch 5. Train accuracy: 0.98,  Train loss:  0.08
+
+Time passed [minutes]: 3.92.     training selected hyperparams: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 3.98.     %accuracy on attack: 0.024379432624113462 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 3.98.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 4.29.     %accuracy on attack: 0.00310283687943258 with hp: {'alpha': 0.01, 'steps': 40, 'epsilon': 0.3}
+Time passed [minutes]: 5.02.     %accuracy on attack: 0.0028257978723403854 with hp: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 5.22.     %accuracy on attack: 0.00470966312056742 with hp: {'alpha': 0.01, 'steps': 20, 'epsilon': 0.3}
+Time passed [minutes]: 5.32.     %accuracy on attack: 0.3589871453900709 with hp: {'alpha': 0.01, 'steps': 7, 'epsilon': 0.3}
+Time passed [minutes]: 5.32.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 5.91.     TEST SCORES of capacity_2:
+Time passed [minutes]: 5.91.     accuracy on test:                         0.9779
+Time passed [minutes]: 5.91.     accuracy on FGSM constructed examples:    0.025699999999999945
+Time passed [minutes]: 5.91.     accuracy on PGD constructed examples:     0.0004999999999999449
+Time passed [minutes]: 5.91.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 6.09.     Epoch 1. Train accuracy: 0.94,  Train loss:  0.23
+
+Time passed [minutes]: 6.30.     Epoch 2. Train accuracy: 0.98,  Train loss:  0.08
+
+Time passed [minutes]: 6.51.     Epoch 3. Train accuracy: 0.98,  Train loss:  0.06
+
+Time passed [minutes]: 6.71.     Epoch 4. Train accuracy: 0.98,  Train loss:  0.05
+
+Time passed [minutes]: 6.90.     Epoch 5. Train accuracy: 0.99,  Train loss:  0.04
+
+Time passed [minutes]: 6.90.     training selected hyperparams: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 6.97.     %accuracy on attack: 0.04017065602836878 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 6.97.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 7.29.     %accuracy on attack: 0.0028812056737588243 with hp: {'alpha': 0.01, 'steps': 40, 'epsilon': 0.3}
+Time passed [minutes]: 8.10.     %accuracy on attack: 0.0027149822695035075 with hp: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 8.27.     %accuracy on attack: 0.0042664007092199085 with hp: {'alpha': 0.01, 'steps': 20, 'epsilon': 0.3}
+Time passed [minutes]: 8.38.     %accuracy on attack: 0.39267508865248224 with hp: {'alpha': 0.01, 'steps': 7, 'epsilon': 0.3}
+Time passed [minutes]: 8.38.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 8.94.     TEST SCORES of capacity_3:
+Time passed [minutes]: 8.94.     accuracy on test:                         0.9842
+Time passed [minutes]: 8.94.     accuracy on FGSM constructed examples:    0.04279999999999995
+Time passed [minutes]: 8.94.     accuracy on PGD constructed examples:     0.0
+Time passed [minutes]: 8.94.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 9.19.     Epoch 1. Train accuracy: 0.95,  Train loss:  0.16
+
+Time passed [minutes]: 9.42.     Epoch 2. Train accuracy: 0.98,  Train loss:  0.05
+
+Time passed [minutes]: 9.64.     Epoch 3. Train accuracy: 0.99,  Train loss:  0.04
+
+Time passed [minutes]: 9.87.     Epoch 4. Train accuracy: 0.99,  Train loss:  0.03
+
+Time passed [minutes]: 10.12.     Epoch 5. Train accuracy: 0.99,  Train loss:  0.02
+
+Time passed [minutes]: 10.12.     training selected hyperparams: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 10.19.     %accuracy on attack: 0.09336214539007093 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 10.19.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 10.63.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 40, 'epsilon': 0.3}
+Time passed [minutes]: 11.66.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 11.90.     %accuracy on attack: 0.005374556737588687 with hp: {'alpha': 0.01, 'steps': 20, 'epsilon': 0.3}
+Time passed [minutes]: 12.03.     %accuracy on attack: 0.39522384751773054 with hp: {'alpha': 0.01, 'steps': 7, 'epsilon': 0.3}
+Time passed [minutes]: 12.03.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 12.79.     TEST SCORES of capacity_4:
+Time passed [minutes]: 12.79.     accuracy on test:                         0.9865
+Time passed [minutes]: 12.79.     accuracy on FGSM constructed examples:    0.08679999999999999
+Time passed [minutes]: 12.79.     accuracy on PGD constructed examples:     0.0
+Time passed [minutes]: 12.79.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 13.01.     Epoch 1. Train accuracy: 0.89,  Train loss:  0.33
+
+Time passed [minutes]: 13.22.     Epoch 2. Train accuracy: 0.97,  Train loss:  0.09
+
+Time passed [minutes]: 13.43.     Epoch 3. Train accuracy: 0.98,  Train loss:  0.07
+
+Time passed [minutes]: 13.64.     Epoch 4. Train accuracy: 0.98,  Train loss:  0.05
+
+Time passed [minutes]: 13.87.     Epoch 5. Train accuracy: 0.99,  Train loss:  0.04
+
+Time passed [minutes]: 13.87.     training selected hyperparams: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 13.92.     %accuracy on attack: 0.09851507092198586 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 13.92.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 14.32.     %accuracy on attack: 0.004155585106383031 with hp: {'alpha': 0.01, 'steps': 40, 'epsilon': 0.3}
+Time passed [minutes]: 15.27.     %accuracy on attack: 0.003213652482269458 with hp: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 15.50.     %accuracy on attack: 0.022550975177304977 with hp: {'alpha': 0.01, 'steps': 20, 'epsilon': 0.3}
+Time passed [minutes]: 15.63.     %accuracy on attack: 0.5044880319148937 with hp: {'alpha': 0.01, 'steps': 7, 'epsilon': 0.3}
+Time passed [minutes]: 15.63.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 16.30.     TEST SCORES of capacity_5:
+Time passed [minutes]: 16.30.     accuracy on test:                         0.9834
+Time passed [minutes]: 16.30.     accuracy on FGSM constructed examples:    0.1008
+Time passed [minutes]: 16.30.     accuracy on PGD constructed examples:     0.00029999999999996696
+Time passed [minutes]: 16.30.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 16.52.     Epoch 1. Train accuracy: 0.93,  Train loss:  0.23
+
+Time passed [minutes]: 16.71.     Epoch 2. Train accuracy: 0.98,  Train loss:  0.07
+
+Time passed [minutes]: 16.93.     Epoch 3. Train accuracy: 0.99,  Train loss:  0.05
+
+Time passed [minutes]: 17.16.     Epoch 4. Train accuracy: 0.99,  Train loss:  0.04
+
+Time passed [minutes]: 17.36.     Epoch 5. Train accuracy: 0.99,  Train loss:  0.03
+
+Time passed [minutes]: 17.36.     training selected hyperparams: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 17.43.     %accuracy on attack: 0.22257313829787229 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 17.43.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 17.83.     %accuracy on attack: 0.013408687943262443 with hp: {'alpha': 0.01, 'steps': 40, 'epsilon': 0.3}
+Time passed [minutes]: 18.77.     %accuracy on attack: 0.008089539007092195 with hp: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 19.01.     %accuracy on attack: 0.05319148936170215 with hp: {'alpha': 0.01, 'steps': 20, 'epsilon': 0.3}
+Time passed [minutes]: 19.13.     %accuracy on attack: 0.4685837765957447 with hp: {'alpha': 0.01, 'steps': 7, 'epsilon': 0.3}
+Time passed [minutes]: 19.13.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 19.84.     TEST SCORES of capacity_6:
+Time passed [minutes]: 19.84.     accuracy on test:                         0.9848
+Time passed [minutes]: 19.84.     accuracy on FGSM constructed examples:    0.22919999999999996
+Time passed [minutes]: 19.84.     accuracy on PGD constructed examples:     0.00660000000000005
+Time passed [minutes]: 19.85.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 20.06.     Epoch 1. Train accuracy: 0.94,  Train loss:  0.19
+
+Time passed [minutes]: 20.29.     Epoch 2. Train accuracy: 0.98,  Train loss:  0.07
+
+Time passed [minutes]: 20.51.     Epoch 3. Train accuracy: 0.99,  Train loss:  0.05
+
+Time passed [minutes]: 20.71.     Epoch 4. Train accuracy: 0.99,  Train loss:  0.04
+
+Time passed [minutes]: 20.94.     Epoch 5. Train accuracy: 0.99,  Train loss:  0.03
+
+Time passed [minutes]: 20.94.     training selected hyperparams: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 21.00.     %accuracy on attack: 0.34524601063829785 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 21.00.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 21.45.     %accuracy on attack: 0.037843528368794344 with hp: {'alpha': 0.01, 'steps': 40, 'epsilon': 0.3}
+Time passed [minutes]: 22.45.     %accuracy on attack: 0.024102393617021267 with hp: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 22.68.     %accuracy on attack: 0.10311391843971629 with hp: {'alpha': 0.01, 'steps': 20, 'epsilon': 0.3}
+Time passed [minutes]: 22.80.     %accuracy on attack: 0.49058067375886527 with hp: {'alpha': 0.01, 'steps': 7, 'epsilon': 0.3}
+Time passed [minutes]: 22.80.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 23.54.     TEST SCORES of capacity_7:
+Time passed [minutes]: 23.54.     accuracy on test:                         0.9833
+Time passed [minutes]: 23.54.     accuracy on FGSM constructed examples:    0.35
+Time passed [minutes]: 23.54.     accuracy on PGD constructed examples:     0.020299999999999985
+Time passed [minutes]: 23.54.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 23.81.     Epoch 1. Train accuracy: 0.95,  Train loss:  0.18
+
+Time passed [minutes]: 24.06.     Epoch 2. Train accuracy: 0.98,  Train loss:  0.07
+
+Time passed [minutes]: 24.31.     Epoch 3. Train accuracy: 0.98,  Train loss:  0.05
+
+Time passed [minutes]: 24.57.     Epoch 4. Train accuracy: 0.99,  Train loss:  0.04
+
+Time passed [minutes]: 24.83.     Epoch 5. Train accuracy: 0.99,  Train loss:  0.03
+
+Time passed [minutes]: 24.83.     training selected hyperparams: {'lr': 0.001, 'batch_size': 128}
+Time passed [minutes]: 24.91.     %accuracy on attack: 0.5464317375886525 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 24.91.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 25.71.     %accuracy on attack: 0.16805186170212771 with hp: {'alpha': 0.01, 'steps': 40, 'epsilon': 0.3}
+Time passed [minutes]: 27.61.     %accuracy on attack: 0.09962322695035464 with hp: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 28.05.     %accuracy on attack: 0.3203125 with hp: {'alpha': 0.01, 'steps': 20, 'epsilon': 0.3}
+Time passed [minutes]: 28.24.     %accuracy on attack: 0.6579676418439716 with hp: {'alpha': 0.01, 'steps': 7, 'epsilon': 0.3}
+Time passed [minutes]: 28.24.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 100, 'epsilon': 0.3}
+Time passed [minutes]: 29.52.     TEST SCORES of capacity_8:
+Time passed [minutes]: 29.52.     accuracy on test:                         0.9813
+Time passed [minutes]: 29.52.     accuracy on FGSM constructed examples:    0.5577
+Time passed [minutes]: 29.52.     accuracy on PGD constructed examples:     0.09919999999999995

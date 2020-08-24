@@ -18,17 +18,18 @@ conda activate hw4_env
 cd SignsTrafficTest
 python example.py 
 """
+run_experiment_1 = False
+run_experiment_2 = True
+run_experiment_3 = False
 
 if __name__ == '__main__':
-    # Experiment 1: attack network
-
     # configs
     experiment_configs = configs.TrafficSigns_experiments_configs
     experiment_hps_sets = configs.TrafficSigns_experiments_hps
     experiment_results_folder = os.path.join(configs.results_folder, "traffic_signs")
     experiment_checkpoints_folder = os.path.join(configs.checkpoints_folder, "traffic_signs")
 
-    logger_path = os.path.join(experiment_results_folder, "log.txt")
+    logger_path = os.path.join(experiment_results_folder, "mnist_experiment_4_capacity_log.txt")
     plots_folder = os.path.join(experiment_results_folder, "plots")
 
     # paths existence validation and initialization
@@ -75,8 +76,10 @@ if __name__ == '__main__':
 
     # create hyperparameters generators
     net_training_hps_gen = helper.GridSearch(experiment_hps_sets["nets_training"])
-    fgsm_attack_hps_gen = helper.GridSearch(experiment_hps_sets["FGSM"])
-    pgd_attack_hps_gen = helper.GridSearch(experiment_hps_sets["PGD"])
+    fgsm_attack_hps_gen = helper.GridSearch(experiment_hps_sets["FGSM_attack"])
+    pgd_attack_hps_gen = helper.GridSearch(experiment_hps_sets["PGD_attack"])
+    fgsm_training_hps_gen = helper.GridSearch(experiment_hps_sets["FGSM_train"])
+    pgd_training_hps_gen = helper.GridSearch(experiment_hps_sets["PGD_train"])
 
     # loss and general training componenets:
     _loss_fn = experiment_configs["loss_function"]
@@ -87,18 +90,21 @@ if __name__ == '__main__':
 
 
 def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs, net_name="", train_attack=None,
-                      load_checkpoint=False, save_checkpoint=False, show_plots=False, save_plots=False):
+                      attack_training_hps_gen=None, load_checkpoint=False, save_checkpoint=False, show_plots=False,
+                      save_plots=False, show_validation_accuracy_each_epoch=False):
     """
-    :param net:
-    :param _loss_fn:
-    :param _training_dataset:
-    :param _testing_dataset:
-    :param epochs:
-    :param net_name:
-    :param train_attack:
-    :param load_checkpoint:
-    :param save_checkpoint:
-    :return:
+    This experiment applies training or adversarial training on the given network. Then it prints the resistant
+    measurements on both PGD and FGSM attacks.
+    :param net: the given network. we initialize net parameters.
+    :param _loss_fn: loss function.
+    :param _training_dataset: the dataset to train on.
+    :param _testing_dataset: a separate dataset to measure resistance and accuracy on.
+    :param epochs: Epochs object that manages the training procedure. see Epochs class in trainer.py for more details.
+    :param net_name: the network name is used in plotting titles and checkpoints files names.
+    :param train_attack: in case we want to apply an adversarial training instead of normal training.
+    :param load_checkpoint: use pre-trained model. To use that verify the existence of one in checkpoints folder.
+    :param save_checkpoint: save the trained model.
+    :return: the resistance results + found hps in the hyperparameter searches + trained network.
     """
     if load_checkpoint:
         checkpoint_path = os.path.join(experiment_checkpoints_folder, "{}.pt".format(net_name))
@@ -111,10 +117,15 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
         resistance_results = checkpoint["resistance_results"]
 
     else:
+        hps_gen = net_training_hps_gen
+        if train_attack is not None:
+            hps_gen = helper.concat_hps_gens(net_training_hps_gen, attack_training_hps_gen)
+
         # apply hyperparameters-search to get a trained network
         net_state_dict, net_hp = helper.full_train_of_nn_with_hps(net, _loss_fn, _training_dataset,
-                                                                  net_training_hps_gen, epochs, device=device,
-                                                                  train_attack=train_attack)
+                                                                  hps_gen, epochs, device=device,
+                                                                  train_attack=train_attack,
+                                                                  show_validation=show_validation_accuracy_each_epoch)
         net.load_state_dict(net_state_dict)
         net.eval()  # from now on we only evaluate net.
 
@@ -127,23 +138,23 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
                                                                         save_figs=False, figs_path=plots_folder)
         logger.log_print("FGSM attack selected hyperparams: {}".format(str(fgsm_hp)))
 
-    # attack selected net using PGD:
-    pgd_hp, pgd_score = helper.full_attack_of_trained_nn_with_hps(net, _loss_fn, _training_dataset,
-                                                                  pgd_attack_hps_gen, net_hp, attacks.PGD,
-                                                                  device=device, plot_results=False,
-                                                                  save_figs=False,
-                                                                  figs_path=plots_folder)
-    logger.log_print("PGD attack selected hyperparams: {}".format(str(pgd_hp)))
+        # attack selected net using PGD:
+        pgd_hp, pgd_score = helper.full_attack_of_trained_nn_with_hps(net, _loss_fn, _training_dataset,
+                                                                      pgd_attack_hps_gen, net_hp, attacks.PGD,
+                                                                      device=device, plot_results=False,
+                                                                      save_figs=False,
+                                                                      figs_path=plots_folder)
+        logger.log_print("PGD attack selected hyperparams: {}".format(str(pgd_hp)))
 
-    # measure attacks on test (holdout)
-    resistance_results = helper.measure_resistance_on_test(net, _loss_fn, _testing_dataset,
-                                                           to_attacks=[(attacks.FGSM, fgsm_hp),
-                                                                       (attacks.PGD, pgd_hp)],
-                                                           device=device,
-                                                           plot_results=show_plots,
-                                                           save_figs=save_plots,
-                                                           figs_path=plots_folder,
-                                                           plots_title=net_name)
+        # measure attacks on test (holdout)
+        resistance_results = helper.measure_resistance_on_test(net, _loss_fn, _testing_dataset,
+                                                               to_attacks=[(attacks.FGSM, fgsm_hp),
+                                                                           (attacks.PGD, pgd_hp)],
+                                                               device=device,
+                                                               plot_results=show_plots,
+                                                               save_figs=save_plots,
+                                                               figs_path=plots_folder,
+                                                               plots_title=net_name)
 
     # unpack resistance_results
     test_acc = resistance_results["test_acc"]  # the accuracy without applying any attack
@@ -152,9 +163,9 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
 
     # print scores:
     logger.log_print("TEST SCORES of {}:".format(net_name))
-    logger.log_print("accuracy on test:            {}".format(test_acc))
-    logger.log_print("%FGSM successful attacks:    {}".format(fgsm_res))
-    logger.log_print("%PGD successful attacks:     {}".format(pgd_res))
+    logger.log_print("accuracy on test:                         {}".format(test_acc))
+    logger.log_print("accuracy on FGSM constructed examples:    {}".format(fgsm_res))
+    logger.log_print("accuracy on PGD constructed examples:     {}".format(pgd_res))
 
     # save checkpoint
     res_dict = {
@@ -175,58 +186,58 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
     return res_dict
 
 
-run_experiment_1 = True
-run_experiment_2 = True
-run_experiment_3 = True
-
 if __name__ == '__main__' and run_experiment_1:
-    net_name = "STN (Spatial Transformer Network)"
+    net_name = "CNN-TrafficSignNet"
     logger.log_print("\n")
     logger.log_print("Experiment 1 on {}".format(net_name))
     # define network
-    original_net = models.TrafficSignNet().to(device)
+    original_net = models.CNNTrafficSignNet().to(device)
+    logger.log_print("Network architecture")
+    logger.log_print(str(original_net))
     exp1_res_dict = experiment_1_func(original_net, _loss_fn, _training_dataset, _testing_dataset, epochs,
                                       net_name=net_name,
                                       save_checkpoint=configs.save_checkpoints,
                                       load_checkpoint=configs.load_checkpoints,
                                       show_plots=configs.show_attacks_plots,
-                                      save_plots=configs.save_attacks_plots)
+                                      save_plots=configs.save_attacks_plots,
+                                      show_validation_accuracy_each_epoch=configs.show_validation_accuracy_each_epoch)
 
 
 # Build robust network with PGD and FGSM and compare them
-def experiment_2_func(exp1_res_dict, net_arch, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
-                      net_name="", load_checkpoint=False, save_checkpoint=False, show_plots=False, save_plots=False):
-    net_hp = exp1_res_dict["net_hp"]
-    fgsm_hp = exp1_res_dict["fgsm_hp"]
-    pgd_hp = exp1_res_dict["pgd_hp"]
-
-    # adversarial_epochs.restart()
-    # fgsm_robust_net = net_arch().to(device)
-    # fgsm_attack = attacks.FGSM(fgsm_robust_net, _loss_fn, fgsm_hp)
-    # experiment_1_func(fgsm_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
-    #                   net_name="{} with FGSM adversarial training".format(net_name), train_attack=fgsm_attack,
-    #                   load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
-    #                   save_plots=save_plots)
+def experiment_2_func(net_arch, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
+                      net_name="", load_checkpoint=False, save_checkpoint=False, show_plots=False, save_plots=False,
+                      show_validation_accuracy_each_epoch=False):
+    adversarial_epochs.restart()
+    fgsm_robust_net = net_arch().to(device)
+    experiment_1_func(fgsm_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
+                      net_name="{} with FGSM adversarial training".format(net_name), train_attack=attacks.FGSM,
+                      attack_training_hps_gen=fgsm_training_hps_gen,
+                      load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
+                      save_plots=save_plots, show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
 
     adversarial_epochs.restart()
     pgd_robust_net = net_arch().to(device)
-    pgd_attack = attacks.PGD(pgd_robust_net, _loss_fn, pgd_hp)
     experiment_1_func(pgd_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
-                      net_name="{} with PGD adversarial training".format(net_name), train_attack=pgd_attack,
+                      net_name="{} with PGD adversarial training".format(net_name), train_attack=attacks.PGD,
+                      attack_training_hps_gen=pgd_training_hps_gen,
                       load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
-                      save_plots=save_plots)
+                      save_plots=save_plots, show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
 
 
 # Experiment 2: Build robust networks + Compare PGD and FGSM adversarial trainings
 if __name__ == '__main__' and run_experiment_2:
+    net_arch = models.CNNTrafficSignNet
+    net_name = net_arch.name
     logger.log_print("\n")
     logger.log_print("Experiment 2 on {}".format(net_name))
-    experiment_2_func(exp1_res_dict, models.TrafficSignNet, _loss_fn, _training_dataset, _testing_dataset, adv_epochs,
+    experiment_2_func(net_arch, _loss_fn, _training_dataset, _testing_dataset,
+                      adv_epochs,
                       net_name=net_name,
                       save_checkpoint=configs.save_checkpoints,
                       load_checkpoint=configs.load_checkpoints,
                       show_plots=configs.show_attacks_plots,
-                      save_plots=configs.save_attacks_plots)
+                      save_plots=configs.save_attacks_plots,
+                      show_validation_accuracy_each_epoch=configs.show_validation_accuracy_each_epoch)
 
 if __name__ == '__main__' and run_experiment_3:
     # Experiment 3: Capacity and robustness
@@ -239,24 +250,15 @@ if __name__ == '__main__' and run_experiment_3:
         "in_wh": 32
     }
 
-    for i in range(1, 10):
-        if 1 <= i <= 3:
-            base_net_params["channels_lst"] = [3, 3 ** i]
-            base_net_params["#FC_Layers"] = 0
-            base_net_params["CNN_out_channels"] = None
-
-        if 3 <= i <= 4:
-            base_net_params["channels_lst"] = [3, 1 * i, 2 * i]
-            base_net_params["#FC_Layers"] = 1
-            base_net_params["CNN_out_channels"] = None
-        if 5 <= i <= 8:
-            base_net_params["channels_lst"] = [3, 3 * i, 6 * i]
+    for i in range(1, 9):
+        if 1 <= i <= 4:
+            base_net_params["channels_lst"] = [3, 2 ** i, 3 ** i]
             base_net_params["#FC_Layers"] = 2
-            base_net_params["CNN_out_channels"] = 4 * i
-        if i == 9:
-            base_net_params["channels_lst"] = [3, 100, 200, 70]
+            base_net_params["CNN_out_channels"] = 10 * i
+        if 5 <= i <= 8:
+            base_net_params["channels_lst"] = [3, 2 ** (i // 2), 2 ** i, 2 ** i]
             base_net_params["#FC_Layers"] = 4
-            base_net_params["CNN_out_channels"] = 40
+            base_net_params["CNN_out_channels"] = 80
 
         cap_net = models.create_conv_nn(base_net_params)
         inc_capacity_nets.append(cap_net)
