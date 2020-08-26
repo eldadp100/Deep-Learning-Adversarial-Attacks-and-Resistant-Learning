@@ -167,7 +167,7 @@ def weight_reset(m):
 
 
 def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, device=None, train_attack=None,
-                              full_train=False, show_validation=False):
+                              full_train=False, show_validation=False, add_natural_examples=False):
     """
     Here we do hyperparameter search to find best training hyperparameter.
     Apply cross validation training and measuring on the hyperparameters and choose the one with best validation measurements.
@@ -181,6 +181,9 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
     :param device: the device to execute on.
     :param train_attack: in case we do an adversarial training. Its hp (parameters) should be given also (tuple).
     :param full_train: train the net on all dataset on the selected hyperparameter.
+    :param show_validation: show also validation measurements on training log.
+    :param add_natural_examples: add natural training examples. relevant only for adversarial training (i.e.
+           train_attack is not None).
     :return: net, net_best_hp, net_best_acc. net is trained on full train dataset (not splitted)
     """
     early_stop = isinstance(epochs, trainer.EarlyStopping)
@@ -203,6 +206,9 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
             # set train and val dataloaders, optimizer
             train_dl, val_dl = dls.get_train_val_dls(train_dataset, hp["batch_size"])
             nn_optimizer = torch.optim.Adam(net.parameters(), hp["lr"])
+            if hp["lr_scheduler_gamma"] is not None:
+                lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(nn_optimizer, hp["lr_scheduler_gamma"])
+                epochs.set_lr_scheduler(lr_scheduler)
 
             # train network
             _val_dl = None
@@ -212,8 +218,9 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
             attack_obj = None
             if train_attack is not None:
                 attack_obj = train_attack(net, loss_fn, hp)
+
             trainer.train_nn(net, nn_optimizer, loss_fn, train_dl, epochs, device=device, attack=attack_obj,
-                             val_dl=_val_dl)
+                             val_dl=_val_dl, add_natural_examples=add_natural_examples)
 
             # measure on validation set
             net_acc = trainer.measure_classification_accuracy(net, val_dl, device=device)
@@ -234,7 +241,8 @@ def full_train_of_nn_with_hps(net, loss_fn, train_dataset, hps_gen, epochs, devi
         attack_obj = None
         if train_attack is not None:
             attack_obj = train_attack(net, loss_fn, net_best_hp)
-        trainer.train_nn(net, nn_optimizer, loss_fn, full_train_dl, epochs, device=device, attack=attack_obj)
+        trainer.train_nn(net, nn_optimizer, loss_fn, full_train_dl, epochs, device=device, attack=attack_obj,
+                         add_natural_examples=add_natural_examples)
         best_net_state_dict = net.state_dict()
 
     return best_net_state_dict, net_best_hp

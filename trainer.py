@@ -81,6 +81,7 @@ class Epochs:
         self.epochs_summaries = list()
         self.stopping_criteria = stopping_criteria
         self.latest_net_params = [None, None]
+        self.lr_scheduler = None
 
     def update(self, epoch_summary, state_dict):
         self.epoch_number += 1
@@ -88,9 +89,6 @@ class Epochs:
         self.stopping_criteria.update(self.epochs_summaries)
         self.latest_net_params[0] = self.latest_net_params[1]
         self.latest_net_params[1] = state_dict
-
-    def view(self):
-        pass  # TODO: ...
 
     def stop(self):
         return self.stopping_criteria.stop()
@@ -102,6 +100,8 @@ class Epochs:
     def print_last_epoch_summary(self):
         summary = self.epochs_summaries[-1]
         msg = "Epoch {}. ".format(len(self.epochs_summaries))
+        if summary["adv_acc"] != -1:
+            msg += "Train adversarial accuracy: {val_acc:2f}.".format(val_acc=summary["adv_acc"])
         if summary["val_acc"] is not None:
             msg += "Validation accuracy: {val_acc:2f}.".format(val_acc=summary["val_acc"])
         msg += "Train accuracy: {train_acc:.2f},  Train loss:  {train_loss:.2f}\n".format(train_acc=summary["acc"],
@@ -113,9 +113,18 @@ class Epochs:
         self.epochs_summaries = list()
         self.stopping_criteria.restart()
         self.latest_net_params = [None, None]
+        self.lr_scheduler = None
+
+    def set_lr_scheduler(self, lr_scheduler):
+        self.lr_scheduler = lr_scheduler
+
+    def adjust_lr(self):
+        if self.lr_scheduler is not None:
+            self.lr_scheduler.step()
 
 
-def train_nn(net, optimizer, loss_fn, train_dl, epochs: Epochs, attack=None, device=None, val_dl=None):
+def train_nn(net, optimizer, loss_fn, train_dl, epochs: Epochs, attack=None, device=None, val_dl=None,
+             add_natural_examples=False):
     """
     :param net: the network to train :)
     :param optimizer: torch.optim optimizer (e.g. SGD or Adam).
@@ -128,6 +137,7 @@ def train_nn(net, optimizer, loss_fn, train_dl, epochs: Epochs, attack=None, dev
                    (i.e. with no resistance to any specific attack).
     :param device: use cuda or cpu
     """
+
     while not epochs.stop():
         batch_information_mat = []
         for batch_num, (batch_data, batch_labels) in enumerate(train_dl):
@@ -135,7 +145,7 @@ def train_nn(net, optimizer, loss_fn, train_dl, epochs: Epochs, attack=None, dev
                 batch_data, batch_labels = batch_data.to(device), batch_labels.to(device)
 
             # train on natural batch
-            if attack is None:
+            if attack is None or add_natural_examples:  # True
                 batch_preds = net(batch_data)
                 _loss = loss_fn(batch_preds, batch_labels)
                 optimizer.zero_grad()
@@ -143,9 +153,10 @@ def train_nn(net, optimizer, loss_fn, train_dl, epochs: Epochs, attack=None, dev
                 optimizer.step()
 
             # train on constructed adversarial examples (Adversarial Training Mode)
-            else:
-                with torch.no_grad():
-                    batch_preds = net(batch_data)  # evaluate on natural examples
+            if attack is not None:
+                if not add_natural_examples:
+                    with torch.no_grad():
+                        batch_preds = net(batch_data)  # evaluate on natural examples
 
                 adversarial_batch_data = attack.perturb(batch_data, batch_labels, device=device)
                 adversarial_batch_preds = net(adversarial_batch_data)
@@ -158,21 +169,27 @@ def train_nn(net, optimizer, loss_fn, train_dl, epochs: Epochs, attack=None, dev
             hard_batch_preds = torch.argmax(batch_preds, dim=1)
             batch_num_currect = (hard_batch_preds == batch_labels).sum().item()
             batch_acc = batch_num_currect / len(batch_labels)
-            batch_information_mat.append([_loss.item(), batch_acc])
+            adv_batch_acc = -1
+            if attack is not None:
+                hard_adv_batch_preds = torch.argmax(adversarial_batch_preds, dim=1)
+                adv_batch_num_currect = (hard_adv_batch_preds == batch_labels).sum().item()
+                adv_batch_acc = adv_batch_num_currect / len(adversarial_batch_preds)
+
+            batch_information_mat.append([_loss.item(), batch_acc, adv_batch_acc])
 
         # summarize epoch (should be a part of the log):
         batch_information_mat = torch.tensor(batch_information_mat)
-        emp_loss, emp_acc = torch.sum(batch_information_mat.T, dim=1) / len(batch_information_mat)
+        emp_loss, emp_acc, adv_acc = torch.sum(batch_information_mat.T, dim=1) / len(batch_information_mat)
         if val_dl is not None:
             val_acc = measure_classification_accuracy(net, val_dl, device=device)
         else:
             val_acc = None
-        curr_epoch_summary = {"acc": emp_acc, "loss": emp_loss, "val_acc": val_acc}
+        curr_epoch_summary = {"acc": emp_acc, "loss": emp_loss, "val_acc": val_acc, "adv_acc": adv_acc}
         epochs.update(curr_epoch_summary, net.state_dict())
         epochs.print_last_epoch_summary()
+        epochs.adjust_lr()
 
     epochs.fix_weights(net)
-    # epochs.view() # save/plot epochs improvement
 
 
 def measure_classification_accuracy(trained_net, dataloader: DataLoader, device=None):

@@ -16,7 +16,7 @@ import logger
 """
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/wolf/sagieb/course/miniconda3/lib/
 
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=7
 conda activate hw4_env
 cd SignsTrafficTest
 python example.py 
@@ -29,14 +29,12 @@ run_experiment_2 = True
 run_experiment_3 = False
 
 if __name__ == '__main__':
-    # Experiment 1: attack network
-
     # configs
     experiment_configs = configs.MNIST_experiments_configs
     experiment_hps_sets = configs.MNIST_experiments_hps
     experiment_results_folder = os.path.join(configs.results_folder, "MNIST")
     experiment_checkpoints_folder = os.path.join(configs.checkpoints_folder, "MNIST")
-    logger_path = os.path.join(experiment_results_folder, "mnist_experiment_4_capacity_log.txt")
+    logger_path = os.path.join(experiment_results_folder, "log.txt")
     plots_folder = os.path.join(experiment_results_folder, "plots")
 
     # paths existence validation and initialization
@@ -124,7 +122,9 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
         net_state_dict, net_hp = helper.full_train_of_nn_with_hps(net, _loss_fn, _training_dataset,
                                                                   hps_gen, epochs, device=device,
                                                                   train_attack=train_attack,
-                                                                  show_validation=show_validation_accuracy_each_epoch)
+                                                                  show_validation=show_validation_accuracy_each_epoch,
+                                                                  add_natural_examples=experiment_configs[
+                                                                      "add_natural_examples"])
         net.load_state_dict(net_state_dict)
         net.eval()  # from now on we only evaluate net.
 
@@ -190,7 +190,7 @@ if __name__ == '__main__' and run_experiment_1:
     logger.log_print("\n")
     logger.log_print("Experiment 1 on {}".format(net_name))
     # define network
-    original_net = models.MNISTNet().to(device)
+    original_net = models.CNNMNISTNet().to(device)
     logger.log_print("Network architecture")
     logger.log_print(str(original_net))
     exp1_res_dict = experiment_1_func(original_net, _loss_fn, _training_dataset, _testing_dataset, epochs,
@@ -203,19 +203,21 @@ if __name__ == '__main__' and run_experiment_1:
 
 
 # Build robust network with PGD and FGSM and compare them
-def experiment_2_func(net_arch, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
+def experiment_2_func(net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
                       net_name="", load_checkpoint=False, save_checkpoint=False, show_plots=False, save_plots=False,
                       show_validation_accuracy_each_epoch=False):
-    adversarial_epochs.restart()
-    fgsm_robust_net = net_arch().to(device)
-    experiment_1_func(fgsm_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
-                      net_name="{} with FGSM adversarial training".format(net_name), train_attack=attacks.FGSM,
-                      attack_training_hps_gen=fgsm_training_hps_gen,
-                      load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
-                      save_plots=save_plots, show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
+    # adversarial_epochs.restart()
+    # net.apply(helper.weight_reset)
+    # fgsm_robust_net = net.to(device)
+    # experiment_1_func(fgsm_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
+    #                   net_name="{} with FGSM adversarial training".format(net_name), train_attack=attacks.FGSM,
+    #                   attack_training_hps_gen=fgsm_training_hps_gen,
+    #                   load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
+    #                   save_plots=save_plots, show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
 
     adversarial_epochs.restart()
-    pgd_robust_net = net_arch().to(device)
+    net.apply(helper.weight_reset)
+    pgd_robust_net = net.to(device)
     experiment_1_func(pgd_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
                       net_name="{} with PGD adversarial training".format(net_name), train_attack=attacks.PGD,
                       attack_training_hps_gen=pgd_training_hps_gen,
@@ -226,9 +228,9 @@ def experiment_2_func(net_arch, _loss_fn, _training_dataset, _testing_dataset, a
 # Experiment 2: Build robust networks + Compare PGD and FGSM adversarial trainings
 if __name__ == '__main__' and run_experiment_2:
     logger.log_print("\n")
-    net_name = "A"
+    net_name = "CNN-NET-MNIST"
     logger.log_print("Experiment 2 on {}".format(net_name))
-    experiment_2_func(models.MNISTNet, _loss_fn, _training_dataset, _testing_dataset,
+    experiment_2_func(models.CNNMNISTNet(), _loss_fn, _training_dataset, _testing_dataset,
                       adv_epochs,
                       net_name=net_name,
                       save_checkpoint=configs.save_checkpoints,
@@ -248,15 +250,11 @@ if __name__ == '__main__' and run_experiment_3:
         "in_wh": 28
     }
 
-    for i in range(1, 9):
-        if 1 <= i <= 4:
-            base_net_params["channels_lst"] = [1, 2 ** i, 3 ** i]
+    for i in range(5, 7):
+        if 1 <= i <= 6:
+            base_net_params["channels_lst"] = [1, 2 ** i, 2 ** i]
             base_net_params["#FC_Layers"] = 2
             base_net_params["CNN_out_channels"] = 10 * i
-        if 5 <= i <= 8:
-            base_net_params["channels_lst"] = [1, 2 ** (i // 2), 2 ** i, 2 ** i]
-            base_net_params["#FC_Layers"] = 4
-            base_net_params["CNN_out_channels"] = 80
 
         cap_net = models.create_conv_nn(base_net_params)
         inc_capacity_nets.append(cap_net)
@@ -265,7 +263,5 @@ if __name__ == '__main__' and run_experiment_3:
     for i, net in enumerate(inc_capacity_nets):
         net = net.to(device)
         epochs.restart()
-        experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs,
-                          net_name="capacity_{}".format(i + 1))
-        # experiment_2_func(net, _loss_fn, _training_dataset, _testing_dataset, adv_epochs,
-        #                   net_name="capacity_{}".format(i))
+        # experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs, net_name="capacity_{}".format(i))
+        experiment_2_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs, net_name="capacity_{}".format(i))

@@ -1,40 +1,50 @@
 import time
 import torch
+import torchvision
+from torchvision.datasets import MNIST
 import attacks
 import configs
 import datasets
+import dls
 import helper
 import models
 import trainer
 import os
 import shutil
 import logger
+import argparse
 
-"""
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/wolf/sagieb/course/miniconda3/lib/
-
-export CUDA_VISIBLE_DEVICES=1
-conda activate hw4_env
-cd SignsTrafficTest
-python example.py 
-"""
-run_experiment_1 = True
+run_experiment_1 = False
 run_experiment_2 = True
 run_experiment_3 = False
 
+# initialization
 if __name__ == '__main__':
-    # configs
-    experiment_configs = configs.TrafficSigns_experiments_configs
-    experiment_hps_sets = configs.TrafficSigns_experiments_hps
-    experiment_results_folder = os.path.join(configs.results_folder, "traffic_signs")
-    experiment_checkpoints_folder = os.path.join(configs.checkpoints_folder, "traffic_signs")
+    # parse args
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset-name', type=str, nargs='+', default='traffic_signs',
+                        help='choose one of: [MNIST, traffic_signs]')
 
+    args = parser.parse_args()
+    dataset_name = "traffic_signs"  # choose from [MNIST, traffic_signs]
+    if dataset_name == "traffic_signs":
+        network_architecture = models.CNNTrafficSignNet
+    elif dataset_name == "MNIST":
+        network_architecture = models.CNNMNISTNet
+
+    # load configs from configs.py
+    experiment_configs = configs.configs_dict[dataset_name]["configs"]
+    experiment_hps_sets = configs.configs_dict[dataset_name]["hps_dict"]
+    experiment_results_folder = os.path.join(configs.results_folder, dataset_name)
+    experiment_checkpoints_folder = os.path.join(configs.checkpoints_folder, dataset_name)
     logger_path = os.path.join(experiment_results_folder, "log.txt")
     plots_folder = os.path.join(experiment_results_folder, "plots")
 
     # paths existence validation and initialization
-    assert os.path.exists(configs.data_root_dir), "The dataset should be in ./data/GTSRB"
-    assert os.path.exists(os.path.join(configs.data_root_dir, "GTSRB")), "The dataset should be in ./data/GTSRB"
+    if dataset_name == "traffic_signs":
+        assert os.path.exists(configs.data_root_dir), "The dataset should be in ./data/GTSRB"
+        assert os.path.exists(os.path.join(configs.data_root_dir, "GTSRB")), "The dataset should be in ./data/GTSRB"
+
     if not os.path.exists(configs.results_folder):
         os.mkdir(configs.results_folder)
     if not os.path.exists(experiment_results_folder):
@@ -61,7 +71,6 @@ if __name__ == '__main__':
 
     # seed
     if configs.seed is not None:
-        # np.random.seed(configs.seed)
         torch.manual_seed(configs.seed)
         logger.log_print("seed: {}".format(configs.seed))
 
@@ -70,9 +79,16 @@ if __name__ == '__main__':
     logger.log_print("execution device: {}".format(device))
 
     # get datasets
-    transform = experiment_configs["data_transform"]
-    _training_dataset = datasets.GTSRB(root_dir=configs.data_root_dir, train=True, transform=transform)
-    _testing_dataset = datasets.GTSRB(root_dir=configs.data_root_dir, train=False, transform=transform)
+    if dataset_name == "MNIST":
+        path_to_save_data = os.path.join(".", "datasets", "mnist_data")
+        _training_dataset = MNIST(path_to_save_data, train=True, download=True,
+                                  transform=torchvision.transforms.Compose([torchvision.transforms.ToTensor()]))
+        _testing_dataset = MNIST(path_to_save_data, train=False, download=True,
+                                 transform=torchvision.transforms.Compose([torchvision.transforms.ToTensor()]))
+    elif dataset_name == "traffic_signs":
+        transform = experiment_configs["data_transform"]
+        _training_dataset = datasets.GTSRB(root_dir=configs.data_root_dir, train=True, transform=transform)
+        _testing_dataset = datasets.GTSRB(root_dir=configs.data_root_dir, train=False, transform=transform)
 
     # create hyperparameters generators
     net_training_hps_gen = helper.GridSearch(experiment_hps_sets["nets_training"])
@@ -104,6 +120,10 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
     :param train_attack: in case we want to apply an adversarial training instead of normal training.
     :param load_checkpoint: use pre-trained model. To use that verify the existence of one in checkpoints folder.
     :param save_checkpoint: save the trained model.
+    :param attack_training_hps_gen: the adversarial attack training parameters we also consider in training hps search.
+    :param save_plots: save the figures.
+    :param show_plots: plot the figures.
+    :param show_validation_accuracy_each_epoch: show also the validation accuracy in each batch in the log prints.
     :return: the resistance results + found hps in the hyperparameter searches + trained network.
     """
     if load_checkpoint:
@@ -188,13 +208,13 @@ def experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs
     return res_dict
 
 
+# Experiment 1: attack the model
 if __name__ == '__main__' and run_experiment_1:
-    net_name = "CNN-TrafficSignNet"
-    logger.log_print("\n")
+    logger.new_section()
+    net_name = network_architecture.name
     logger.log_print("Experiment 1 on {}".format(net_name))
-    # define network
-    original_net = models.CNNTrafficSignNet().to(device)
-    logger.log_print("Network architecture")
+    original_net = network_architecture().to(device)
+    logger.log_print("Network architecture:")
     logger.log_print(str(original_net))
     exp1_res_dict = experiment_1_func(original_net, _loss_fn, _training_dataset, _testing_dataset, epochs,
                                       net_name=net_name,
@@ -209,6 +229,9 @@ if __name__ == '__main__' and run_experiment_1:
 def experiment_2_func(net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
                       net_name="", load_checkpoint=False, save_checkpoint=False, show_plots=False, save_plots=False,
                       show_validation_accuracy_each_epoch=False):
+    """
+     Apply adversarial training with FGSM and PGD and then analyze it. the parameters are the same as in experiment 1.
+    """
     adversarial_epochs.restart()
     net.apply(helper.weight_reset)
     fgsm_robust_net = net.to(device)
@@ -228,14 +251,13 @@ def experiment_2_func(net, _loss_fn, _training_dataset, _testing_dataset, advers
                       save_plots=save_plots, show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
 
 
-# Experiment 2: Build robust networks + Compare PGD and FGSM adversarial trainings
+# Experiment 2+3: Build robust networks + Compare PGD and FGSM adversarial trainings
 if __name__ == '__main__' and run_experiment_2:
-    exp2_net = models.CNNTrafficSignNet()
+    exp2_net = network_architecture().to(device)
     net_name = exp2_net.name
-    logger.log_print("\n")
+    logger.new_section()
     logger.log_print("Experiment 2 on {}".format(net_name))
-    experiment_2_func(exp2_net, _loss_fn, _training_dataset, _testing_dataset,
-                      adv_epochs,
+    experiment_2_func(exp2_net, _loss_fn, _training_dataset, _testing_dataset, adv_epochs,
                       net_name=net_name,
                       save_checkpoint=configs.save_checkpoints,
                       load_checkpoint=configs.load_checkpoints,
@@ -243,26 +265,26 @@ if __name__ == '__main__' and run_experiment_2:
                       save_plots=configs.save_attacks_plots,
                       show_validation_accuracy_each_epoch=configs.show_validation_accuracy_each_epoch)
 
+# Experiment 4: Capacity and robustness
 if __name__ == '__main__' and run_experiment_3:
-    # Experiment 3: Capacity and robustness
     inc_capacity_nets = []
     base_net_params = {
-        "extras_blocks_components": [],  # ["dropout"],
+        "extras_blocks_components": [],
         # "p_dropout": 0.1,
         "activation": torch.nn.LeakyReLU,
-        "out_size": 43,
-        "in_wh": 32
     }
+    if dataset_name == "MNIST":
+        base_net_params["out_size"] = 10
+        base_net_params["in_wh"] = 28
+    elif dataset_name == "traffic_signs":
+        base_net_params["out_size"] = 43
+        base_net_params["in_wh"] = 32
 
-    for i in range(1, 9):
-        if 1 <= i <= 4:
-            base_net_params["channels_lst"] = [3, 2 ** i, 3 ** i]
+    for i in range(1, 7):
+        if 1 <= i <= 6:
+            base_net_params["channels_lst"] = [1, 2 ** i, 2 ** i]
             base_net_params["#FC_Layers"] = 2
             base_net_params["CNN_out_channels"] = 10 * i
-        if 5 <= i <= 8:
-            base_net_params["channels_lst"] = [3, 2 ** (i // 2), 2 ** i, 2 ** i]
-            base_net_params["#FC_Layers"] = 4
-            base_net_params["CNN_out_channels"] = 80
 
         cap_net = models.create_conv_nn(base_net_params)
         inc_capacity_nets.append(cap_net)
@@ -271,6 +293,6 @@ if __name__ == '__main__' and run_experiment_3:
     for i, net in enumerate(inc_capacity_nets):
         net = net.to(device)
         epochs.restart()
-        experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs, net_name="capacity_{}".format(i))
-        experiment_2_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs, net_name="capacity_{}".format(i))
-    # plot results
+        net_name = "capacity_{}".format(i + 1)
+        experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs, net_name=net_name)
+        experiment_2_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs, net_name=net_name)

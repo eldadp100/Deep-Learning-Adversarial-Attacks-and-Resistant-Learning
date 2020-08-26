@@ -195,7 +195,7 @@ class STNTrafficSignNet(nn.Module):
         return x
 
 
-class MNISTNet(nn.Module):
+class CNNMNISTNet(nn.Module):
     name = "MNIST-NET"
 
     def __init__(self):

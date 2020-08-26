@@ -9,7 +9,7 @@ experiment_hps_sets = configs.TrafficSigns_experiments_hps
 experiment_results_folder = os.path.join(configs.results_folder, "MNIST")
 experiment_checkpoints_folder = os.path.join(configs.checkpoints_folder, "MNIST")
 
-logger_path = os.path.join(experiment_results_folder, "mnist_experiment_4_capacity_log.txt")
+logger_path = os.path.join(experiment_results_folder, "inspection_log.txt")
 plots_folder = os.path.join(experiment_results_folder, "plots")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
