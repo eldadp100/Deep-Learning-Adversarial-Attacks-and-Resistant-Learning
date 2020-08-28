@@ -5,7 +5,6 @@ from torchvision.datasets import MNIST
 import attacks
 import configs
 import datasets
-import dls
 import helper
 import models
 import trainer
@@ -14,19 +13,30 @@ import shutil
 import logger
 import argparse
 
+"""
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/wolf/sagieb/course/miniconda3/lib/
+
+export CUDA_VISIBLE_DEVICES=5
+conda activate hw4_env
+cd SignsTrafficTest
+python experiments.py --dataset-name MNIST
+"""
+
 run_experiment_1 = False
 run_experiment_2 = True
 run_experiment_3 = False
+
+test_PGD, test_FGSM = True, False
 
 # initialization
 if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset-name', type=str, nargs='+', default='traffic_signs',
+    parser.add_argument('--dataset-name', type=str, default='traffic_signs',
                         help='choose one of: [MNIST, traffic_signs]')
 
     args = parser.parse_args()
-    dataset_name = "traffic_signs"  # choose from [MNIST, traffic_signs]
+    dataset_name = args.dataset_name  # choose from [MNIST, traffic_signs]
     if dataset_name == "traffic_signs":
         network_architecture = models.CNNTrafficSignNet
     elif dataset_name == "MNIST":
@@ -62,6 +72,7 @@ if __name__ == '__main__':
 
     # set logger
     logger.init_log(logger_path)
+    logger.log_print("Dataset name: {}".format(dataset_name))
     logger.log_print("checkpoints folder: {}".format(experiment_checkpoints_folder))
     logger.log_print("save checkpoints: {}".format(configs.save_checkpoints))
     logger.log_print("load checkpoints: {}".format(configs.load_checkpoints))
@@ -232,23 +243,25 @@ def experiment_2_func(net, _loss_fn, _training_dataset, _testing_dataset, advers
     """
      Apply adversarial training with FGSM and PGD and then analyze it. the parameters are the same as in experiment 1.
     """
-    adversarial_epochs.restart()
-    net.apply(helper.weight_reset)
-    fgsm_robust_net = net.to(device)
-    experiment_1_func(fgsm_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
-                      net_name="{} with FGSM adversarial training".format(net_name), train_attack=attacks.FGSM,
-                      attack_training_hps_gen=fgsm_training_hps_gen,
-                      load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
-                      save_plots=save_plots, show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
+    if test_FGSM:
+        adversarial_epochs.restart()
+        net.apply(helper.weight_reset)
+        fgsm_robust_net = net.to(device)
+        experiment_1_func(fgsm_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
+                          net_name="{} with FGSM adversarial training".format(net_name), train_attack=attacks.FGSM,
+                          attack_training_hps_gen=fgsm_training_hps_gen,
+                          load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
+                          save_plots=save_plots, show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
 
-    adversarial_epochs.restart()
-    net.apply(helper.weight_reset)
-    pgd_robust_net = net.to(device)
-    experiment_1_func(pgd_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
-                      net_name="{} with PGD adversarial training".format(net_name), train_attack=attacks.PGD,
-                      attack_training_hps_gen=pgd_training_hps_gen,
-                      load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
-                      save_plots=save_plots, show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
+    if test_PGD:
+        adversarial_epochs.restart()
+        net.apply(helper.weight_reset)
+        pgd_robust_net = net.to(device)
+        experiment_1_func(pgd_robust_net, _loss_fn, _training_dataset, _testing_dataset, adversarial_epochs,
+                          net_name="{} with PGD adversarial training".format(net_name), train_attack=attacks.PGD,
+                          attack_training_hps_gen=pgd_training_hps_gen,
+                          load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
+                          save_plots=save_plots, show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
 
 
 # Experiment 2+3: Build robust networks + Compare PGD and FGSM adversarial trainings
@@ -271,18 +284,20 @@ if __name__ == '__main__' and run_experiment_3:
     base_net_params = {
         "extras_blocks_components": [],
         # "p_dropout": 0.1,
-        "activation": torch.nn.LeakyReLU,
+        "activation": torch.nn.ReLU,
     }
     if dataset_name == "MNIST":
         base_net_params["out_size"] = 10
         base_net_params["in_wh"] = 28
+        in_channels = 1
     elif dataset_name == "traffic_signs":
         base_net_params["out_size"] = 43
         base_net_params["in_wh"] = 32
+        in_channels = 3
 
     for i in range(1, 7):
         if 1 <= i <= 6:
-            base_net_params["channels_lst"] = [1, 2 ** i, 2 ** i]
+            base_net_params["channels_lst"] = [in_channels, 2 ** i, 2 ** i]
             base_net_params["#FC_Layers"] = 2
             base_net_params["CNN_out_channels"] = 10 * i
 

@@ -60,7 +60,7 @@ TrafficSigns_experiments_hps = {
 }
 
 MNIST_experiments_configs = {
-    "adversarial_training_stopping_criteria": trainer.ConstantStopping(20),
+    "adversarial_training_stopping_criteria": trainer.ConstantStopping(8),
     "training_stopping_criteria": trainer.ConstantStopping(5),
     "loss_function": nn.CrossEntropyLoss(),  # the nets architectures are built based on CE loss
     "add_natural_examples": False
@@ -73,7 +73,7 @@ MNIST_experiments_hps = {
 
     "PGD_attack": {
         "alpha": [0.01],
-        "steps": [40],
+        "steps": [30],
         "epsilon": [0.3]
     },
 
@@ -88,7 +88,7 @@ MNIST_experiments_hps = {
     },
 
     "nets_training": {
-        "lr": [0.0001],
+        "lr": [0.0003],
         "batch_size": [128],
         "lr_scheduler_gamma": [0.85]
     },
