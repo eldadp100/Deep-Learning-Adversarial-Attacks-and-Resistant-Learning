@@ -16,7 +16,7 @@ import argparse
 """
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/wolf/sagieb/course/miniconda3/lib/
 
-export CUDA_VISIBLE_DEVICES=5
+export CUDA_VISIBLE_DEVICES=7
 conda activate hw4_env
 cd SignsTrafficTest
 python experiments.py --dataset-name MNIST
@@ -251,7 +251,8 @@ def experiment_2_func(net, _loss_fn, _training_dataset, _testing_dataset, advers
                           net_name="{} with FGSM adversarial training".format(net_name), train_attack=attacks.FGSM,
                           attack_training_hps_gen=fgsm_training_hps_gen,
                           load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
-                          save_plots=save_plots, show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
+                          save_plots=save_plots,
+                          show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
 
     if test_PGD:
         adversarial_epochs.restart()
@@ -261,12 +262,14 @@ def experiment_2_func(net, _loss_fn, _training_dataset, _testing_dataset, advers
                           net_name="{} with PGD adversarial training".format(net_name), train_attack=attacks.PGD,
                           attack_training_hps_gen=pgd_training_hps_gen,
                           load_checkpoint=load_checkpoint, save_checkpoint=save_checkpoint, show_plots=show_plots,
-                          save_plots=save_plots, show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
+                          save_plots=save_plots,
+                          show_validation_accuracy_each_epoch=show_validation_accuracy_each_epoch)
 
 
 # Experiment 2+3: Build robust networks + Compare PGD and FGSM adversarial trainings
 if __name__ == '__main__' and run_experiment_2:
     exp2_net = network_architecture().to(device)
+
     net_name = exp2_net.name
     logger.new_section()
     logger.log_print("Experiment 2 on {}".format(net_name))
@@ -297,8 +300,8 @@ if __name__ == '__main__' and run_experiment_3:
 
     for i in range(1, 7):
         if 1 <= i <= 6:
-            base_net_params["channels_lst"] = [in_channels, 2 ** i, 2 ** i]
-            base_net_params["#FC_Layers"] = 2
+            base_net_params["channels_lst"] = [in_channels, 2 ** i, 2 ** i, 2 ** (i + 1)]
+            base_net_params["#FC_Layers"] = 3
             base_net_params["CNN_out_channels"] = 10 * i
 
         cap_net = models.create_conv_nn(base_net_params)
@@ -307,7 +310,8 @@ if __name__ == '__main__' and run_experiment_3:
     # run experiment 1 and 2 on each capacity
     for i, net in enumerate(inc_capacity_nets):
         net = net.to(device)
-        epochs.restart()
         net_name = "capacity_{}".format(i + 1)
+        epochs.restart()
         experiment_1_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs, net_name=net_name)
-        experiment_2_func(net, _loss_fn, _training_dataset, _testing_dataset, epochs, net_name=net_name)
+        adv_epochs.restart()
+        experiment_2_func(net, _loss_fn, _training_dataset, _testing_dataset, adv_epochs, net_name=net_name)

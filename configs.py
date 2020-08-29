@@ -60,7 +60,7 @@ TrafficSigns_experiments_hps = {
 }
 
 MNIST_experiments_configs = {
-    "adversarial_training_stopping_criteria": trainer.ConstantStopping(8),
+    "adversarial_training_stopping_criteria": trainer.ConstantStopping(15),
     "training_stopping_criteria": trainer.ConstantStopping(5),
     "loss_function": nn.CrossEntropyLoss(),  # the nets architectures are built based on CE loss
     "add_natural_examples": False
@@ -90,7 +90,7 @@ MNIST_experiments_hps = {
     "nets_training": {
         "lr": [0.0003],
         "batch_size": [128],
-        "lr_scheduler_gamma": [0.85]
+        "lr_scheduler_gamma": [0.95]
     },
 }
 
