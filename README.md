@@ -15,7 +15,8 @@ The dataset of GTSRB is taken from https://github.com/tomlawrenceuk/GTSRB-Datalo
 ## How to run the project
 (the exact commands are for GTSRB dataset, for MNIST see the comment below)
 1. clone this repository (the dataset also included).
-2. run from the project directory: "python experiments.py --dataset-name traffic_signs"
+2. If you run on GPU set a specific GPU using: export CUDA_VISIBLE_DEVICES=<GPU NUMBER>
+3. run from the project directory: "python experiments.py --dataset-name traffic_signs"
 
 for MNIST - "python experiments.py --dataset-name MNIST".
 
@@ -25,7 +26,7 @@ see configs.py to set configs. The configurations on this reposetory are tested 
 1. Dataset - please download the dataset from this repo. (clone this repo including data folder)
 2. Conda Environment - I used hw4_env to execute the project. (Activate using "conda activate hw4_env") 
 3. Libraries: Pytorch, Torchvision and some other known. All apear in hw4_env.
-
+4. Both GPU and CPU supported. GPU is more recommnended.
 ## Notes
 In nova I occurred a bug "ImportError: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.21' not found (required by home/wolf/sagieb/course/miniconda3/envs/hw4_env/lib/python3.7/site-packages/kiwisolver.cpython-37m-x86_64-linux-gnu.so)".
 To fix the bug I add: "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/wolf/sagieb/course/miniconda3/lib/" 
