@@ -33,13 +33,13 @@ TrafficSigns_experiments_configs = {
 
 TrafficSigns_experiments_hps = {
     "FGSM_attack": {
-        "epsilon": [0.22, 0.3],  # 2 / 255,
+        "epsilon": [0.22],
     },
 
     "PGD_attack": {
         "alpha": [0.01],
-        "steps": [100, 30, 20, 7],
-        "epsilon": [0.22, 10/255, 30/255, 0.3]  # 2 / 255,
+        "steps": [30],
+        "epsilon": [0.22],
     },
 
     "FGSM_train": {
@@ -49,7 +49,7 @@ TrafficSigns_experiments_hps = {
     "PGD_train": {
         "alpha": [0.01],
         "steps": [30],
-        "epsilon": [0.2]
+        "epsilon": [0.22]
     },
 
     "nets_training": {

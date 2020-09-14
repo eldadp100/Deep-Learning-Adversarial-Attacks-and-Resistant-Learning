@@ -16,17 +16,17 @@ import argparse
 """
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/wolf/sagieb/course/miniconda3/lib/
 
-export CUDA_VISIBLE_DEVICES=7
+export CUDA_VISIBLE_DEVICES=3
 conda activate hw4_env
 cd SignsTrafficTest
 python experiments.py --dataset-name MNIST
 """
 
-run_experiment_1 = False
+run_experiment_1 = True
 run_experiment_2 = True
-run_experiment_3 = False
+run_experiment_3 = True
 
-test_PGD, test_FGSM = True, False
+test_PGD, test_FGSM = True, True
 
 # initialization
 if __name__ == '__main__':
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     if not os.path.exists(experiment_results_folder):
         os.mkdir(experiment_results_folder)
     if not os.path.exists(configs.checkpoints_folder):
-        os.mkdir(experiment_results_folder)
+        os.mkdir(configs.checkpoints_folder)
     if not os.path.exists(experiment_checkpoints_folder):
         os.mkdir(experiment_checkpoints_folder)
     if os.path.exists(plots_folder):
@@ -283,6 +283,7 @@ if __name__ == '__main__' and run_experiment_2:
 
 # Experiment 4: Capacity and robustness
 if __name__ == '__main__' and run_experiment_3:
+    logger.log_print("Experiment 4:")
     inc_capacity_nets = []
     base_net_params = {
         "extras_blocks_components": [],
@@ -300,7 +301,7 @@ if __name__ == '__main__' and run_experiment_3:
 
     for i in range(1, 7):
         if 1 <= i <= 6:
-            base_net_params["channels_lst"] = [in_channels, 2 ** i, 2 ** i, 2 ** (i + 1)]
+            base_net_params["channels_lst"] = [in_channels, 2 ** (i - 1), 2 ** (i + 1)]
             base_net_params["#FC_Layers"] = 3
             base_net_params["CNN_out_channels"] = 10 * i
 

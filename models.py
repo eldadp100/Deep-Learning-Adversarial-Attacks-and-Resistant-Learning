@@ -125,18 +125,18 @@ class CNNMNISTNet(nn.Module):
     def __init__(self):
         super().__init__()
         self.cnn = nn.Sequential(
-            nn.Conv2d(1, 50, 3, padding=1, stride=1),  # 28 -> 14
+            nn.Conv2d(1, 32, 3, padding=1, stride=1),  # 28 -> 14
             nn.ReLU(),
-            nn.Conv2d(50, 50, 3, padding=1, stride=2),  # 28 -> 14
+            nn.Conv2d(32, 128, 3, padding=1, stride=2),  # 28 -> 14
             nn.ReLU(),
-            # nn.Dropout(p=0.1),
-            nn.Conv2d(50, 100, 3, padding=1, stride=1),  # 14 -> 7
+            nn.Dropout(p=0.05),
+            nn.Conv2d(128, 128, 3, padding=1, stride=1),  # 14 -> 7
             nn.ReLU(),
-            nn.Conv2d(100, 100, 3, padding=1, stride=2),  # 14 -> 7
+            nn.Conv2d(128, 256, 3, padding=1, stride=2),  # 14 -> 7
             nn.ReLU(),
 
-            # nn.Dropout(p=0.05),
-            nn.Conv2d(200, 100, 4),  # 7 -> 4
+            nn.Dropout(p=0.05),
+            nn.Conv2d(256, 100, 4),  # 7 -> 4
             nn.ReLU(),
         )
 
