@@ -25,7 +25,7 @@ see configs.py to set configs.
 3. Libraries: Pytorch, Torchvision and some other known. All apear in hw4_env.
 
 ## Notes
-In nova I occurd a bug "ImportError: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.21' not found (required by home/wolf/sagieb/course/miniconda3/envs/hw4_env/lib/python3.7/site-packages/kiwisolver.cpython-37m-x86_64-linux-gnu.so)".
+In nova I occurred a bug "ImportError: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.21' not found (required by home/wolf/sagieb/course/miniconda3/envs/hw4_env/lib/python3.7/site-packages/kiwisolver.cpython-37m-x86_64-linux-gnu.so)".
 To fix the bug I add: "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/wolf/sagieb/course/miniconda3/lib/" 
 
 ## The files in the project:
