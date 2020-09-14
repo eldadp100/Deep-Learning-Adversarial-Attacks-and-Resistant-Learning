@@ -15,7 +15,7 @@ The dataset of GTSRB is taken from https://github.com/tomlawrenceuk/GTSRB-Datalo
 ## How to run the project
 (the exact commands are for GTSRB dataset, for MNIST see the comment below)
 1. clone this repository (the dataset also included).
-2. If you run on GPU set a specific GPU using: export CUDA_VISIBLE_DEVICES=<GPU NUMBER>
+2. If you run on GPU set a specific GPU using: export CUDA_VISIBLE_DEVICES=YOUR_GPU_NUMBER
 3. run from the project directory: "python experiments.py --dataset-name traffic_signs"
 
 for MNIST - "python experiments.py --dataset-name MNIST".
