@@ -3,6 +3,8 @@ based on Towards Deep Learning Models Resistant to Adversarial Attacks paper - h
 
 For any grading problem please send me an email to eldadperetz@mail.tau.ac.il.
 
+The pdf / word report called final_proj.pdf / final_proj.docx. 
+
 ## General information
 The project consists of 2 parts:
 1. Theoretical background to adversarial attacks, detailed summary of the paper, review on related papers and experiments that verify the results on GTSRB (German Traffic Sign Recognition) dataset.
