@@ -1,6 +1,5 @@
 # Convolutional Neural Networks Final Project
-
-####based on Towards Deep Learning Models Resistant to Adversarial Attacks paper - https://arxiv.org/pdf/1706.06083.pdf.
+based on Towards Deep Learning Models Resistant to Adversarial Attacks paper - https://arxiv.org/pdf/1706.06083.pdf.
 
 The project consists of 2 parts:
 1. Theoretical background to adversarial attacks, detailed summary of the paper, review on related papers and experiments that verify the results on GTSRB (German Traffic Sign Recognition) dataset.
