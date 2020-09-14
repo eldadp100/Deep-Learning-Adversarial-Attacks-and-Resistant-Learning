@@ -19,7 +19,7 @@ The dataset of GTSRB is taken from https://github.com/tomlawrenceuk/GTSRB-Datalo
 
 for MNIST - "python experiments.py --dataset-name MNIST".
 
-see configs.py to set configs.
+see configs.py to set configs. The configurations on this reposetory are tested and match the to the report.  
 
 ## Requirements
 1. Dataset - please download the dataset from this repo. (clone this repo including data folder)
