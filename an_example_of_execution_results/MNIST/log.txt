@@ -1,0 +1,761 @@
+Time passed [minutes]: 0.00.     execution date (d/m/y): 14/09/2020, 22:25:25
+Time passed [minutes]: 0.00.     Dataset name: MNIST
+Time passed [minutes]: 0.00.     checkpoints folder: ./checkpoints/MNIST
+Time passed [minutes]: 0.00.     save checkpoints: False
+Time passed [minutes]: 0.00.     load checkpoints: False
+Time passed [minutes]: 0.00.     results folder: ./results_folder/MNIST
+Time passed [minutes]: 0.00.     show results:  False
+Time passed [minutes]: 0.00.     save results:  True
+Time passed [minutes]: 0.00.     execution device: cuda
+
+
+
+Time passed [minutes]: 0.08.     Experiment 1 on MNIST-NET
+Time passed [minutes]: 0.18.     Network architecture:
+Time passed [minutes]: 0.18.     CNNMNISTNet(
+  (cnn): Sequential(
+    (0): Conv2d(1, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): ReLU()
+    (2): Conv2d(32, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+    (3): ReLU()
+    (4): Dropout(p=0.05, inplace=False)
+    (5): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (6): ReLU()
+    (7): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+    (8): ReLU()
+    (9): Dropout(p=0.05, inplace=False)
+    (10): Conv2d(256, 100, kernel_size=(4, 4), stride=(1, 1))
+    (11): ReLU()
+  )
+  (lin): Sequential(
+    (0): Linear(in_features=1600, out_features=100, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=100, out_features=10, bias=True)
+  )
+)
+Time passed [minutes]: 0.18.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 0.34.     Epoch 1. Train accuracy: 0.91,  Train loss:  0.28
+
+Time passed [minutes]: 0.49.     Epoch 2. Train accuracy: 0.98,  Train loss:  0.07
+
+Time passed [minutes]: 0.65.     Epoch 3. Train accuracy: 0.99,  Train loss:  0.04
+
+Time passed [minutes]: 0.80.     Epoch 4. Train accuracy: 0.99,  Train loss:  0.03
+
+Time passed [minutes]: 0.96.     Epoch 5. Train accuracy: 0.99,  Train loss:  0.02
+
+Time passed [minutes]: 0.96.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 1.02.     %accuracy on attack: 0.16273271276595747 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 1.02.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 1.60.     %accuracy on attack: 0.007147606382978733 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 1.60.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 2.04.     TEST SCORES of MNIST-NET:
+Time passed [minutes]: 2.04.     accuracy on test:                         0.9885
+Time passed [minutes]: 2.04.     accuracy on FGSM constructed examples:    0.17190000000000005
+Time passed [minutes]: 2.04.     accuracy on PGD constructed examples:     0.005700000000000038
+
+
+
+Time passed [minutes]: 2.04.     Experiment 2 on MNIST-NET
+Time passed [minutes]: 2.04.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 2.28.     Epoch 1. Train adversarial accuracy: 0.471365.Train accuracy: 0.63,  Train loss:  1.45
+
+Time passed [minutes]: 2.52.     Epoch 2. Train adversarial accuracy: 0.809274.Train accuracy: 0.88,  Train loss:  0.58
+
+Time passed [minutes]: 2.75.     Epoch 3. Train adversarial accuracy: 0.858659.Train accuracy: 0.91,  Train loss:  0.43
+
+Time passed [minutes]: 2.99.     Epoch 4. Train adversarial accuracy: 0.878026.Train accuracy: 0.92,  Train loss:  0.37
+
+Time passed [minutes]: 3.23.     Epoch 5. Train adversarial accuracy: 0.895439.Train accuracy: 0.91,  Train loss:  0.32
+
+Time passed [minutes]: 3.47.     Epoch 6. Train adversarial accuracy: 0.909387.Train accuracy: 0.93,  Train loss:  0.28
+
+Time passed [minutes]: 3.72.     Epoch 7. Train adversarial accuracy: 0.917822.Train accuracy: 0.94,  Train loss:  0.25
+
+Time passed [minutes]: 3.97.     Epoch 8. Train adversarial accuracy: 0.921586.Train accuracy: 0.93,  Train loss:  0.24
+
+Time passed [minutes]: 4.21.     Epoch 9. Train adversarial accuracy: 0.931270.Train accuracy: 0.93,  Train loss:  0.21
+
+Time passed [minutes]: 4.46.     Epoch 10. Train adversarial accuracy: 0.931870.Train accuracy: 0.94,  Train loss:  0.21
+
+Time passed [minutes]: 4.71.     Epoch 11. Train adversarial accuracy: 0.931203.Train accuracy: 0.94,  Train loss:  0.21
+
+Time passed [minutes]: 4.96.     Epoch 12. Train adversarial accuracy: 0.940310.Train accuracy: 0.91,  Train loss:  0.18
+
+Time passed [minutes]: 5.21.     Epoch 13. Train adversarial accuracy: 0.945912.Train accuracy: 0.95,  Train loss:  0.17
+
+Time passed [minutes]: 5.46.     Epoch 14. Train adversarial accuracy: 0.937661.Train accuracy: 0.95,  Train loss:  0.19
+
+Time passed [minutes]: 5.71.     Epoch 15. Train adversarial accuracy: 0.920898.Train accuracy: 0.87,  Train loss:  0.26
+
+Time passed [minutes]: 5.71.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 5.77.     %accuracy on attack: 0.8958887411347518 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 5.77.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 6.35.     %accuracy on attack: 0.2082225177304965 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 6.35.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 6.78.     TEST SCORES of MNIST-NET with FGSM adversarial training:
+Time passed [minutes]: 6.78.     accuracy on test:                         0.9709
+Time passed [minutes]: 6.78.     accuracy on FGSM constructed examples:    0.8964
+Time passed [minutes]: 6.78.     accuracy on PGD constructed examples:     0.20389999999999997
+Time passed [minutes]: 6.78.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 8.77.     Epoch 1. Train adversarial accuracy: 0.290090.Train accuracy: 0.43,  Train loss:  1.89
+
+Time passed [minutes]: 10.76.     Epoch 2. Train adversarial accuracy: 0.737734.Train accuracy: 0.94,  Train loss:  0.74
+
+Time passed [minutes]: 12.75.     Epoch 3. Train adversarial accuracy: 0.823600.Train accuracy: 0.96,  Train loss:  0.51
+
+Time passed [minutes]: 14.73.     Epoch 4. Train adversarial accuracy: 0.854816.Train accuracy: 0.97,  Train loss:  0.43
+
+Time passed [minutes]: 16.73.     Epoch 5. Train adversarial accuracy: 0.873556.Train accuracy: 0.98,  Train loss:  0.37
+
+Time passed [minutes]: 18.72.     Epoch 6. Train adversarial accuracy: 0.887371.Train accuracy: 0.98,  Train loss:  0.34
+
+Time passed [minutes]: 20.71.     Epoch 7. Train adversarial accuracy: 0.895967.Train accuracy: 0.98,  Train loss:  0.31
+
+Time passed [minutes]: 22.70.     Epoch 8. Train adversarial accuracy: 0.904062.Train accuracy: 0.98,  Train loss:  0.29
+
+Time passed [minutes]: 24.69.     Epoch 9. Train adversarial accuracy: 0.909609.Train accuracy: 0.98,  Train loss:  0.27
+
+Time passed [minutes]: 26.67.     Epoch 10. Train adversarial accuracy: 0.915384.Train accuracy: 0.98,  Train loss:  0.25
+
+Time passed [minutes]: 28.66.     Epoch 11. Train adversarial accuracy: 0.917849.Train accuracy: 0.98,  Train loss:  0.24
+
+Time passed [minutes]: 30.65.     Epoch 12. Train adversarial accuracy: 0.924107.Train accuracy: 0.99,  Train loss:  0.23
+
+Time passed [minutes]: 32.64.     Epoch 13. Train adversarial accuracy: 0.927805.Train accuracy: 0.99,  Train loss:  0.22
+
+Time passed [minutes]: 34.63.     Epoch 14. Train adversarial accuracy: 0.930676.Train accuracy: 0.99,  Train loss:  0.21
+
+Time passed [minutes]: 36.62.     Epoch 15. Train adversarial accuracy: 0.933424.Train accuracy: 0.99,  Train loss:  0.20
+
+Time passed [minutes]: 36.62.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 36.67.     %accuracy on attack: 0.9446476063829787 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 36.67.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 37.26.     %accuracy on attack: 0.9285793439716312 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 37.26.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 37.68.     TEST SCORES of MNIST-NET with PGD adversarial training:
+Time passed [minutes]: 37.68.     accuracy on test:                         0.9861
+Time passed [minutes]: 37.68.     accuracy on FGSM constructed examples:    0.9432
+Time passed [minutes]: 37.68.     accuracy on PGD constructed examples:     0.9288
+Time passed [minutes]: 37.68.     Experiment 4:
+Time passed [minutes]: 37.68.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 37.80.     Epoch 1. Train accuracy: 0.50,  Train loss:  1.37
+
+Time passed [minutes]: 37.93.     Epoch 2. Train accuracy: 0.90,  Train loss:  0.33
+
+Time passed [minutes]: 38.05.     Epoch 3. Train accuracy: 0.92,  Train loss:  0.27
+
+Time passed [minutes]: 38.17.     Epoch 4. Train accuracy: 0.92,  Train loss:  0.24
+
+Time passed [minutes]: 38.29.     Epoch 5. Train accuracy: 0.93,  Train loss:  0.22
+
+Time passed [minutes]: 38.29.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 38.33.     %accuracy on attack: 0.014683067375886538 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 38.33.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 38.48.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 38.48.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 38.62.     TEST SCORES of capacity_1:
+Time passed [minutes]: 38.62.     accuracy on test:                         0.9383
+Time passed [minutes]: 38.62.     accuracy on FGSM constructed examples:    0.010299999999999976
+Time passed [minutes]: 38.62.     accuracy on PGD constructed examples:     0.0
+Time passed [minutes]: 38.62.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 38.76.     Epoch 1. Train adversarial accuracy: 0.375922.Train accuracy: 0.53,  Train loss:  1.73
+
+Time passed [minutes]: 38.91.     Epoch 2. Train adversarial accuracy: 0.684702.Train accuracy: 0.79,  Train loss:  0.95
+
+Time passed [minutes]: 39.06.     Epoch 3. Train adversarial accuracy: 0.726029.Train accuracy: 0.74,  Train loss:  0.84
+
+Time passed [minutes]: 39.21.     Epoch 4. Train adversarial accuracy: 0.745203.Train accuracy: 0.74,  Train loss:  0.78
+
+Time passed [minutes]: 39.36.     Epoch 5. Train adversarial accuracy: 0.762971.Train accuracy: 0.74,  Train loss:  0.72
+
+Time passed [minutes]: 39.51.     Epoch 6. Train adversarial accuracy: 0.769195.Train accuracy: 0.74,  Train loss:  0.70
+
+Time passed [minutes]: 39.66.     Epoch 7. Train adversarial accuracy: 0.774959.Train accuracy: 0.74,  Train loss:  0.68
+
+Time passed [minutes]: 39.82.     Epoch 8. Train adversarial accuracy: 0.787685.Train accuracy: 0.74,  Train loss:  0.65
+
+Time passed [minutes]: 39.97.     Epoch 9. Train adversarial accuracy: 0.793527.Train accuracy: 0.73,  Train loss:  0.64
+
+Time passed [minutes]: 40.12.     Epoch 10. Train adversarial accuracy: 0.797303.Train accuracy: 0.75,  Train loss:  0.63
+
+Time passed [minutes]: 40.28.     Epoch 11. Train adversarial accuracy: 0.799418.Train accuracy: 0.79,  Train loss:  0.62
+
+Time passed [minutes]: 40.43.     Epoch 12. Train adversarial accuracy: 0.804604.Train accuracy: 0.78,  Train loss:  0.61
+
+Time passed [minutes]: 40.58.     Epoch 13. Train adversarial accuracy: 0.806253.Train accuracy: 0.75,  Train loss:  0.60
+
+Time passed [minutes]: 40.73.     Epoch 14. Train adversarial accuracy: 0.806481.Train accuracy: 0.78,  Train loss:  0.60
+
+Time passed [minutes]: 40.88.     Epoch 15. Train adversarial accuracy: 0.805209.Train accuracy: 0.81,  Train loss:  0.61
+
+Time passed [minutes]: 40.88.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 40.92.     %accuracy on attack: 0.8234153368794326 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 40.92.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 41.09.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 41.09.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 41.25.     TEST SCORES of capacity_1 with FGSM adversarial training:
+Time passed [minutes]: 41.25.     accuracy on test:                         0.843
+Time passed [minutes]: 41.25.     accuracy on FGSM constructed examples:    0.8376
+Time passed [minutes]: 41.25.     accuracy on PGD constructed examples:     0.0
+Time passed [minutes]: 41.25.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 41.83.     Epoch 1. Train adversarial accuracy: 0.107215.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 42.42.     Epoch 2. Train adversarial accuracy: 0.111907.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 43.01.     Epoch 3. Train adversarial accuracy: 0.112085.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 43.60.     Epoch 4. Train adversarial accuracy: 0.111413.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 44.18.     Epoch 5. Train adversarial accuracy: 0.111141.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 44.77.     Epoch 6. Train adversarial accuracy: 0.111885.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 45.35.     Epoch 7. Train adversarial accuracy: 0.111874.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 45.93.     Epoch 8. Train adversarial accuracy: 0.112373.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 46.51.     Epoch 9. Train adversarial accuracy: 0.111818.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 47.04.     Epoch 10. Train adversarial accuracy: 0.112035.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 47.59.     Epoch 11. Train adversarial accuracy: 0.112174.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 48.12.     Epoch 12. Train adversarial accuracy: 0.112385.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 48.65.     Epoch 13. Train adversarial accuracy: 0.112396.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 49.19.     Epoch 14. Train adversarial accuracy: 0.112362.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 49.72.     Epoch 15. Train adversarial accuracy: 0.112346.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 49.72.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 49.76.     %accuracy on attack: 0.11425088652482274 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 49.76.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 49.92.     %accuracy on attack: 0.11458333333333337 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 49.92.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 50.06.     TEST SCORES of capacity_1 with PGD adversarial training:
+Time passed [minutes]: 50.06.     accuracy on test:                         0.1135
+Time passed [minutes]: 50.06.     accuracy on FGSM constructed examples:    0.11350000000000005
+Time passed [minutes]: 50.06.     accuracy on PGD constructed examples:     0.11350000000000005
+Time passed [minutes]: 50.06.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 50.18.     Epoch 1. Train accuracy: 0.82,  Train loss:  0.57
+
+Time passed [minutes]: 50.30.     Epoch 2. Train accuracy: 0.94,  Train loss:  0.20
+
+Time passed [minutes]: 50.42.     Epoch 3. Train accuracy: 0.96,  Train loss:  0.14
+
+Time passed [minutes]: 50.54.     Epoch 4. Train accuracy: 0.96,  Train loss:  0.12
+
+Time passed [minutes]: 50.65.     Epoch 5. Train accuracy: 0.97,  Train loss:  0.10
+
+Time passed [minutes]: 50.65.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 50.69.     %accuracy on attack: 0.03019725177304966 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 50.69.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 50.86.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 50.86.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 51.02.     TEST SCORES of capacity_2:
+Time passed [minutes]: 51.02.     accuracy on test:                         0.9708
+Time passed [minutes]: 51.02.     accuracy on FGSM constructed examples:    0.027699999999999947
+Time passed [minutes]: 51.02.     accuracy on PGD constructed examples:     0.0
+Time passed [minutes]: 51.02.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 51.17.     Epoch 1. Train adversarial accuracy: 0.312761.Train accuracy: 0.37,  Train loss:  1.86
+
+Time passed [minutes]: 51.32.     Epoch 2. Train adversarial accuracy: 0.704619.Train accuracy: 0.71,  Train loss:  0.89
+
+Time passed [minutes]: 51.47.     Epoch 3. Train adversarial accuracy: 0.767585.Train accuracy: 0.78,  Train loss:  0.72
+
+Time passed [minutes]: 51.62.     Epoch 4. Train adversarial accuracy: 0.810118.Train accuracy: 0.81,  Train loss:  0.60
+
+Time passed [minutes]: 51.76.     Epoch 5. Train adversarial accuracy: 0.823777.Train accuracy: 0.81,  Train loss:  0.55
+
+Time passed [minutes]: 51.91.     Epoch 6. Train adversarial accuracy: 0.837814.Train accuracy: 0.79,  Train loss:  0.51
+
+Time passed [minutes]: 52.06.     Epoch 7. Train adversarial accuracy: 0.841385.Train accuracy: 0.77,  Train loss:  0.49
+
+Time passed [minutes]: 52.21.     Epoch 8. Train adversarial accuracy: 0.848153.Train accuracy: 0.75,  Train loss:  0.48
+
+Time passed [minutes]: 52.36.     Epoch 9. Train adversarial accuracy: 0.852540.Train accuracy: 0.76,  Train loss:  0.46
+
+Time passed [minutes]: 52.51.     Epoch 10. Train adversarial accuracy: 0.854655.Train accuracy: 0.76,  Train loss:  0.45
+
+Time passed [minutes]: 52.66.     Epoch 11. Train adversarial accuracy: 0.856804.Train accuracy: 0.75,  Train loss:  0.45
+
+Time passed [minutes]: 52.81.     Epoch 12. Train adversarial accuracy: 0.860075.Train accuracy: 0.75,  Train loss:  0.43
+
+Time passed [minutes]: 52.96.     Epoch 13. Train adversarial accuracy: 0.859014.Train accuracy: 0.76,  Train loss:  0.44
+
+Time passed [minutes]: 53.11.     Epoch 14. Train adversarial accuracy: 0.862118.Train accuracy: 0.77,  Train loss:  0.43
+
+Time passed [minutes]: 53.26.     Epoch 15. Train adversarial accuracy: 0.865683.Train accuracy: 0.79,  Train loss:  0.42
+
+Time passed [minutes]: 53.26.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 53.30.     %accuracy on attack: 0.8555518617021276 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 53.30.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 53.47.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 53.47.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 53.62.     TEST SCORES of capacity_2 with FGSM adversarial training:
+Time passed [minutes]: 53.62.     accuracy on test:                         0.8065
+Time passed [minutes]: 53.62.     accuracy on FGSM constructed examples:    0.8672
+Time passed [minutes]: 53.62.     accuracy on PGD constructed examples:     0.0
+Time passed [minutes]: 53.62.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 54.21.     Epoch 1. Train adversarial accuracy: 0.104555.Train accuracy: 0.11,  Train loss:  2.31
+
+Time passed [minutes]: 54.79.     Epoch 2. Train adversarial accuracy: 0.108387.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 55.38.     Epoch 3. Train adversarial accuracy: 0.109830.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 55.96.     Epoch 4. Train adversarial accuracy: 0.111124.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 56.55.     Epoch 5. Train adversarial accuracy: 0.111907.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 57.14.     Epoch 6. Train adversarial accuracy: 0.112312.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 57.73.     Epoch 7. Train adversarial accuracy: 0.112368.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 58.30.     Epoch 8. Train adversarial accuracy: 0.112346.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 58.82.     Epoch 9. Train adversarial accuracy: 0.111929.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 59.35.     Epoch 10. Train adversarial accuracy: 0.112346.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 59.88.     Epoch 11. Train adversarial accuracy: 0.112396.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 60.41.     Epoch 12. Train adversarial accuracy: 0.112368.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 60.95.     Epoch 13. Train adversarial accuracy: 0.112351.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 61.48.     Epoch 14. Train adversarial accuracy: 0.112379.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 62.01.     Epoch 15. Train adversarial accuracy: 0.111740.Train accuracy: 0.11,  Train loss:  2.30
+
+Time passed [minutes]: 62.01.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 62.05.     %accuracy on attack: 0.11297650709219853 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 62.05.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 62.21.     %accuracy on attack: 0.11801861702127658 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 62.21.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 62.35.     TEST SCORES of capacity_2 with PGD adversarial training:
+Time passed [minutes]: 62.35.     accuracy on test:                         0.1135
+Time passed [minutes]: 62.35.     accuracy on FGSM constructed examples:    0.11350000000000005
+Time passed [minutes]: 62.35.     accuracy on PGD constructed examples:     0.11350000000000005
+Time passed [minutes]: 62.35.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 62.47.     Epoch 1. Train accuracy: 0.89,  Train loss:  0.37
+
+Time passed [minutes]: 62.60.     Epoch 2. Train accuracy: 0.96,  Train loss:  0.13
+
+Time passed [minutes]: 62.72.     Epoch 3. Train accuracy: 0.97,  Train loss:  0.10
+
+Time passed [minutes]: 62.85.     Epoch 4. Train accuracy: 0.98,  Train loss:  0.08
+
+Time passed [minutes]: 62.97.     Epoch 5. Train accuracy: 0.98,  Train loss:  0.07
+
+Time passed [minutes]: 62.97.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 63.01.     %accuracy on attack: 0.060172872340425565 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 63.01.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 63.19.     %accuracy on attack: 0.0058178191489361986 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 63.19.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 63.34.     TEST SCORES of capacity_3:
+Time passed [minutes]: 63.34.     accuracy on test:                         0.9788
+Time passed [minutes]: 63.34.     accuracy on FGSM constructed examples:    0.058599999999999985
+Time passed [minutes]: 63.34.     accuracy on PGD constructed examples:     0.0036000000000000476
+Time passed [minutes]: 63.34.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 63.49.     Epoch 1. Train adversarial accuracy: 0.419987.Train accuracy: 0.47,  Train loss:  1.60
+
+Time passed [minutes]: 63.64.     Epoch 2. Train adversarial accuracy: 0.732815.Train accuracy: 0.72,  Train loss:  0.81
+
+Time passed [minutes]: 63.79.     Epoch 3. Train adversarial accuracy: 0.784776.Train accuracy: 0.79,  Train loss:  0.66
+
+Time passed [minutes]: 63.95.     Epoch 4. Train adversarial accuracy: 0.820185.Train accuracy: 0.78,  Train loss:  0.56
+
+Time passed [minutes]: 64.10.     Epoch 5. Train adversarial accuracy: 0.837326.Train accuracy: 0.75,  Train loss:  0.50
+
+Time passed [minutes]: 64.25.     Epoch 6. Train adversarial accuracy: 0.851413.Train accuracy: 0.80,  Train loss:  0.46
+
+Time passed [minutes]: 64.40.     Epoch 7. Train adversarial accuracy: 0.864511.Train accuracy: 0.79,  Train loss:  0.42
+
+Time passed [minutes]: 64.54.     Epoch 8. Train adversarial accuracy: 0.877160.Train accuracy: 0.80,  Train loss:  0.38
+
+Time passed [minutes]: 64.69.     Epoch 9. Train adversarial accuracy: 0.887032.Train accuracy: 0.81,  Train loss:  0.36
+
+Time passed [minutes]: 64.85.     Epoch 10. Train adversarial accuracy: 0.897855.Train accuracy: 0.80,  Train loss:  0.32
+
+Time passed [minutes]: 65.00.     Epoch 11. Train adversarial accuracy: 0.906555.Train accuracy: 0.80,  Train loss:  0.30
+
+Time passed [minutes]: 65.15.     Epoch 12. Train adversarial accuracy: 0.911792.Train accuracy: 0.78,  Train loss:  0.28
+
+Time passed [minutes]: 65.30.     Epoch 13. Train adversarial accuracy: 0.916361.Train accuracy: 0.74,  Train loss:  0.27
+
+Time passed [minutes]: 65.45.     Epoch 14. Train adversarial accuracy: 0.920426.Train accuracy: 0.73,  Train loss:  0.25
+
+Time passed [minutes]: 65.60.     Epoch 15. Train adversarial accuracy: 0.927305.Train accuracy: 0.70,  Train loss:  0.23
+
+Time passed [minutes]: 65.60.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 65.64.     %accuracy on attack: 0.933843085106383 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 65.64.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 65.80.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 65.80.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 65.96.     TEST SCORES of capacity_3 with FGSM adversarial training:
+Time passed [minutes]: 65.96.     accuracy on test:                         0.6772
+Time passed [minutes]: 65.96.     accuracy on FGSM constructed examples:    0.9347
+Time passed [minutes]: 65.96.     accuracy on PGD constructed examples:     0.0
+Time passed [minutes]: 65.96.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 66.54.     Epoch 1. Train adversarial accuracy: 0.182153.Train accuracy: 0.39,  Train loss:  2.20
+
+Time passed [minutes]: 67.13.     Epoch 2. Train adversarial accuracy: 0.385805.Train accuracy: 0.85,  Train loss:  1.73
+
+Time passed [minutes]: 67.70.     Epoch 3. Train adversarial accuracy: 0.442098.Train accuracy: 0.90,  Train loss:  1.56
+
+Time passed [minutes]: 68.29.     Epoch 4. Train adversarial accuracy: 0.463497.Train accuracy: 0.91,  Train loss:  1.50
+
+Time passed [minutes]: 68.87.     Epoch 5. Train adversarial accuracy: 0.476379.Train accuracy: 0.91,  Train loss:  1.47
+
+Time passed [minutes]: 69.45.     Epoch 6. Train adversarial accuracy: 0.485530.Train accuracy: 0.92,  Train loss:  1.45
+
+Time passed [minutes]: 70.03.     Epoch 7. Train adversarial accuracy: 0.493698.Train accuracy: 0.92,  Train loss:  1.42
+
+Time passed [minutes]: 70.57.     Epoch 8. Train adversarial accuracy: 0.505947.Train accuracy: 0.92,  Train loss:  1.39
+
+Time passed [minutes]: 71.10.     Epoch 9. Train adversarial accuracy: 0.522688.Train accuracy: 0.92,  Train loss:  1.35
+
+Time passed [minutes]: 71.63.     Epoch 10. Train adversarial accuracy: 0.546947.Train accuracy: 0.92,  Train loss:  1.29
+
+Time passed [minutes]: 72.16.     Epoch 11. Train adversarial accuracy: 0.565326.Train accuracy: 0.92,  Train loss:  1.24
+
+Time passed [minutes]: 72.70.     Epoch 12. Train adversarial accuracy: 0.581978.Train accuracy: 0.92,  Train loss:  1.21
+
+Time passed [minutes]: 73.24.     Epoch 13. Train adversarial accuracy: 0.596365.Train accuracy: 0.92,  Train loss:  1.17
+
+Time passed [minutes]: 73.78.     Epoch 14. Train adversarial accuracy: 0.609841.Train accuracy: 0.91,  Train loss:  1.13
+
+Time passed [minutes]: 74.34.     Epoch 15. Train adversarial accuracy: 0.620330.Train accuracy: 0.91,  Train loss:  1.10
+
+Time passed [minutes]: 74.34.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 74.38.     %accuracy on attack: 0.727449024822695 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 74.38.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 74.55.     %accuracy on attack: 0.628656914893617 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 74.55.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 74.70.     TEST SCORES of capacity_3 with PGD adversarial training:
+Time passed [minutes]: 74.70.     accuracy on test:                         0.9193
+Time passed [minutes]: 74.70.     accuracy on FGSM constructed examples:    0.7531
+Time passed [minutes]: 74.70.     accuracy on PGD constructed examples:     0.6554
+Time passed [minutes]: 74.70.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 74.84.     Epoch 1. Train accuracy: 0.86,  Train loss:  0.42
+
+Time passed [minutes]: 74.97.     Epoch 2. Train accuracy: 0.97,  Train loss:  0.10
+
+Time passed [minutes]: 75.10.     Epoch 3. Train accuracy: 0.98,  Train loss:  0.08
+
+Time passed [minutes]: 75.24.     Epoch 4. Train accuracy: 0.98,  Train loss:  0.06
+
+Time passed [minutes]: 75.37.     Epoch 5. Train accuracy: 0.98,  Train loss:  0.05
+
+Time passed [minutes]: 75.37.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 75.41.     %accuracy on attack: 0.09962322695035464 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 75.41.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 75.62.     %accuracy on attack: 0.003047429078014141 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 75.62.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 75.79.     TEST SCORES of capacity_4:
+Time passed [minutes]: 75.79.     accuracy on test:                         0.9814
+Time passed [minutes]: 75.79.     accuracy on FGSM constructed examples:    0.1049
+Time passed [minutes]: 75.79.     accuracy on PGD constructed examples:     0.00019999999999997797
+Time passed [minutes]: 75.79.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 75.95.     Epoch 1. Train adversarial accuracy: 0.538752.Train accuracy: 0.73,  Train loss:  1.31
+
+Time passed [minutes]: 76.11.     Epoch 2. Train adversarial accuracy: 0.761960.Train accuracy: 0.84,  Train loss:  0.72
+
+Time passed [minutes]: 76.27.     Epoch 3. Train adversarial accuracy: 0.810379.Train accuracy: 0.87,  Train loss:  0.58
+
+Time passed [minutes]: 76.43.     Epoch 4. Train adversarial accuracy: 0.842390.Train accuracy: 0.90,  Train loss:  0.49
+
+Time passed [minutes]: 76.59.     Epoch 5. Train adversarial accuracy: 0.859414.Train accuracy: 0.89,  Train loss:  0.44
+
+Time passed [minutes]: 76.75.     Epoch 6. Train adversarial accuracy: 0.875861.Train accuracy: 0.89,  Train loss:  0.39
+
+Time passed [minutes]: 76.91.     Epoch 7. Train adversarial accuracy: 0.887282.Train accuracy: 0.87,  Train loss:  0.35
+
+Time passed [minutes]: 77.06.     Epoch 8. Train adversarial accuracy: 0.895656.Train accuracy: 0.83,  Train loss:  0.33
+
+Time passed [minutes]: 77.22.     Epoch 9. Train adversarial accuracy: 0.899620.Train accuracy: 0.80,  Train loss:  0.31
+
+Time passed [minutes]: 77.38.     Epoch 10. Train adversarial accuracy: 0.905123.Train accuracy: 0.76,  Train loss:  0.30
+
+Time passed [minutes]: 77.54.     Epoch 11. Train adversarial accuracy: 0.911692.Train accuracy: 0.70,  Train loss:  0.28
+
+Time passed [minutes]: 77.70.     Epoch 12. Train adversarial accuracy: 0.914362.Train accuracy: 0.69,  Train loss:  0.27
+
+Time passed [minutes]: 77.86.     Epoch 13. Train adversarial accuracy: 0.917039.Train accuracy: 0.62,  Train loss:  0.26
+
+Time passed [minutes]: 78.02.     Epoch 14. Train adversarial accuracy: 0.923113.Train accuracy: 0.65,  Train loss:  0.24
+
+Time passed [minutes]: 78.18.     Epoch 15. Train adversarial accuracy: 0.925412.Train accuracy: 0.62,  Train loss:  0.23
+
+Time passed [minutes]: 78.18.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 78.22.     %accuracy on attack: 0.9335660460992907 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 78.22.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 78.42.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 78.42.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 78.59.     TEST SCORES of capacity_4 with FGSM adversarial training:
+Time passed [minutes]: 78.59.     accuracy on test:                         0.6714
+Time passed [minutes]: 78.59.     accuracy on FGSM constructed examples:    0.9271
+Time passed [minutes]: 78.59.     accuracy on PGD constructed examples:     0.0
+Time passed [minutes]: 78.59.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 79.29.     Epoch 1. Train adversarial accuracy: 0.279284.Train accuracy: 0.63,  Train loss:  1.98
+
+Time passed [minutes]: 79.98.     Epoch 2. Train adversarial accuracy: 0.454896.Train accuracy: 0.92,  Train loss:  1.50
+
+Time passed [minutes]: 80.68.     Epoch 3. Train adversarial accuracy: 0.499983.Train accuracy: 0.93,  Train loss:  1.38
+
+Time passed [minutes]: 81.37.     Epoch 4. Train adversarial accuracy: 0.527702.Train accuracy: 0.93,  Train loss:  1.30
+
+Time passed [minutes]: 82.05.     Epoch 5. Train adversarial accuracy: 0.550734.Train accuracy: 0.94,  Train loss:  1.24
+
+Time passed [minutes]: 82.71.     Epoch 6. Train adversarial accuracy: 0.569430.Train accuracy: 0.94,  Train loss:  1.19
+
+Time passed [minutes]: 83.38.     Epoch 7. Train adversarial accuracy: 0.586931.Train accuracy: 0.93,  Train loss:  1.15
+
+Time passed [minutes]: 84.04.     Epoch 8. Train adversarial accuracy: 0.607881.Train accuracy: 0.93,  Train loss:  1.10
+
+Time passed [minutes]: 84.71.     Epoch 9. Train adversarial accuracy: 0.624345.Train accuracy: 0.93,  Train loss:  1.05
+
+Time passed [minutes]: 85.37.     Epoch 10. Train adversarial accuracy: 0.639492.Train accuracy: 0.92,  Train loss:  1.02
+
+Time passed [minutes]: 86.06.     Epoch 11. Train adversarial accuracy: 0.647399.Train accuracy: 0.92,  Train loss:  1.00
+
+Time passed [minutes]: 86.76.     Epoch 12. Train adversarial accuracy: 0.658421.Train accuracy: 0.92,  Train loss:  0.97
+
+Time passed [minutes]: 87.46.     Epoch 13. Train adversarial accuracy: 0.662152.Train accuracy: 0.92,  Train loss:  0.96
+
+Time passed [minutes]: 88.16.     Epoch 14. Train adversarial accuracy: 0.666106.Train accuracy: 0.92,  Train loss:  0.95
+
+Time passed [minutes]: 88.86.     Epoch 15. Train adversarial accuracy: 0.672830.Train accuracy: 0.92,  Train loss:  0.93
+
+Time passed [minutes]: 88.86.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 88.90.     %accuracy on attack: 0.7514406028368794 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 88.90.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 89.10.     %accuracy on attack: 0.6743683510638299 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 89.10.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 89.28.     TEST SCORES of capacity_4 with PGD adversarial training:
+Time passed [minutes]: 89.28.     accuracy on test:                         0.9137
+Time passed [minutes]: 89.28.     accuracy on FGSM constructed examples:    0.7571
+Time passed [minutes]: 89.28.     accuracy on PGD constructed examples:     0.6838
+Time passed [minutes]: 89.28.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 89.42.     Epoch 1. Train accuracy: 0.92,  Train loss:  0.27
+
+Time passed [minutes]: 89.57.     Epoch 2. Train accuracy: 0.98,  Train loss:  0.08
+
+Time passed [minutes]: 89.71.     Epoch 3. Train accuracy: 0.98,  Train loss:  0.06
+
+Time passed [minutes]: 89.86.     Epoch 4. Train accuracy: 0.99,  Train loss:  0.05
+
+Time passed [minutes]: 90.00.     Epoch 5. Train accuracy: 0.99,  Train loss:  0.04
+
+Time passed [minutes]: 90.00.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 90.05.     %accuracy on attack: 0.111646719858156 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 90.05.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 90.31.     %accuracy on attack: 0.0029366134751772632 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 90.31.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 90.52.     TEST SCORES of capacity_5:
+Time passed [minutes]: 90.52.     accuracy on test:                         0.9817
+Time passed [minutes]: 90.52.     accuracy on FGSM constructed examples:    0.11019999999999996
+Time passed [minutes]: 90.52.     accuracy on PGD constructed examples:     0.0004999999999999449
+Time passed [minutes]: 90.52.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 90.70.     Epoch 1. Train adversarial accuracy: 0.598309.Train accuracy: 0.78,  Train loss:  1.14
+
+Time passed [minutes]: 90.87.     Epoch 2. Train adversarial accuracy: 0.816870.Train accuracy: 0.88,  Train loss:  0.57
+
+Time passed [minutes]: 91.05.     Epoch 3. Train adversarial accuracy: 0.861962.Train accuracy: 0.85,  Train loss:  0.43
+
+Time passed [minutes]: 91.23.     Epoch 4. Train adversarial accuracy: 0.886200.Train accuracy: 0.82,  Train loss:  0.36
+
+Time passed [minutes]: 91.41.     Epoch 5. Train adversarial accuracy: 0.897444.Train accuracy: 0.87,  Train loss:  0.32
+
+Time passed [minutes]: 91.59.     Epoch 6. Train adversarial accuracy: 0.911475.Train accuracy: 0.83,  Train loss:  0.28
+
+Time passed [minutes]: 91.77.     Epoch 7. Train adversarial accuracy: 0.920437.Train accuracy: 0.77,  Train loss:  0.25
+
+Time passed [minutes]: 91.95.     Epoch 8. Train adversarial accuracy: 0.924879.Train accuracy: 0.77,  Train loss:  0.24
+
+Time passed [minutes]: 92.13.     Epoch 9. Train adversarial accuracy: 0.929216.Train accuracy: 0.77,  Train loss:  0.22
+
+Time passed [minutes]: 92.31.     Epoch 10. Train adversarial accuracy: 0.935923.Train accuracy: 0.73,  Train loss:  0.20
+
+Time passed [minutes]: 92.49.     Epoch 11. Train adversarial accuracy: 0.940265.Train accuracy: 0.72,  Train loss:  0.19
+
+Time passed [minutes]: 92.67.     Epoch 12. Train adversarial accuracy: 0.942964.Train accuracy: 0.69,  Train loss:  0.18
+
+Time passed [minutes]: 92.85.     Epoch 13. Train adversarial accuracy: 0.944013.Train accuracy: 0.66,  Train loss:  0.17
+
+Time passed [minutes]: 93.03.     Epoch 14. Train adversarial accuracy: 0.944424.Train accuracy: 0.65,  Train loss:  0.18
+
+Time passed [minutes]: 93.21.     Epoch 15. Train adversarial accuracy: 0.946195.Train accuracy: 0.63,  Train loss:  0.17
+
+Time passed [minutes]: 93.21.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 93.25.     %accuracy on attack: 0.9519060283687943 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 93.25.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 93.50.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 93.50.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 93.71.     TEST SCORES of capacity_5 with FGSM adversarial training:
+Time passed [minutes]: 93.71.     accuracy on test:                         0.554
+Time passed [minutes]: 93.71.     accuracy on FGSM constructed examples:    0.9505
+Time passed [minutes]: 93.71.     accuracy on PGD constructed examples:     0.0
+Time passed [minutes]: 93.71.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 94.58.     Epoch 1. Train adversarial accuracy: 0.321889.Train accuracy: 0.75,  Train loss:  1.87
+
+Time passed [minutes]: 95.45.     Epoch 2. Train adversarial accuracy: 0.466773.Train accuracy: 0.93,  Train loss:  1.45
+
+Time passed [minutes]: 96.32.     Epoch 3. Train adversarial accuracy: 0.506696.Train accuracy: 0.94,  Train loss:  1.35
+
+Time passed [minutes]: 97.19.     Epoch 4. Train adversarial accuracy: 0.533682.Train accuracy: 0.94,  Train loss:  1.29
+
+Time passed [minutes]: 98.08.     Epoch 5. Train adversarial accuracy: 0.556320.Train accuracy: 0.94,  Train loss:  1.24
+
+Time passed [minutes]: 98.97.     Epoch 6. Train adversarial accuracy: 0.571950.Train accuracy: 0.94,  Train loss:  1.20
+
+Time passed [minutes]: 99.86.     Epoch 7. Train adversarial accuracy: 0.589014.Train accuracy: 0.95,  Train loss:  1.16
+
+Time passed [minutes]: 100.74.     Epoch 8. Train adversarial accuracy: 0.605866.Train accuracy: 0.95,  Train loss:  1.12
+
+Time passed [minutes]: 101.63.     Epoch 9. Train adversarial accuracy: 0.626305.Train accuracy: 0.95,  Train loss:  1.07
+
+Time passed [minutes]: 102.52.     Epoch 10. Train adversarial accuracy: 0.642835.Train accuracy: 0.95,  Train loss:  1.03
+
+Time passed [minutes]: 103.41.     Epoch 11. Train adversarial accuracy: 0.659110.Train accuracy: 0.95,  Train loss:  0.99
+
+Time passed [minutes]: 104.29.     Epoch 12. Train adversarial accuracy: 0.670748.Train accuracy: 0.95,  Train loss:  0.96
+
+Time passed [minutes]: 105.18.     Epoch 13. Train adversarial accuracy: 0.679793.Train accuracy: 0.95,  Train loss:  0.94
+
+Time passed [minutes]: 106.05.     Epoch 14. Train adversarial accuracy: 0.685762.Train accuracy: 0.95,  Train loss:  0.92
+
+Time passed [minutes]: 106.92.     Epoch 15. Train adversarial accuracy: 0.689177.Train accuracy: 0.95,  Train loss:  0.91
+
+Time passed [minutes]: 106.92.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 106.96.     %accuracy on attack: 0.7839095744680851 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 106.96.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 107.21.     %accuracy on attack: 0.6970301418439716 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 107.21.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 107.42.     TEST SCORES of capacity_5 with PGD adversarial training:
+Time passed [minutes]: 107.42.     accuracy on test:                         0.9475
+Time passed [minutes]: 107.42.     accuracy on FGSM constructed examples:    0.7964
+Time passed [minutes]: 107.42.     accuracy on PGD constructed examples:     0.7057
+Time passed [minutes]: 107.42.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 107.58.     Epoch 1. Train accuracy: 0.93,  Train loss:  0.23
+
+Time passed [minutes]: 107.73.     Epoch 2. Train accuracy: 0.98,  Train loss:  0.06
+
+Time passed [minutes]: 107.89.     Epoch 3. Train accuracy: 0.99,  Train loss:  0.05
+
+Time passed [minutes]: 108.05.     Epoch 4. Train accuracy: 0.99,  Train loss:  0.03
+
+Time passed [minutes]: 108.21.     Epoch 5. Train accuracy: 0.99,  Train loss:  0.03
+
+Time passed [minutes]: 108.21.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95}
+Time passed [minutes]: 108.26.     %accuracy on attack: 0.15120789007092195 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 108.26.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 108.63.     %accuracy on attack: 0.002992021276595702 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 108.63.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 108.92.     TEST SCORES of capacity_6:
+Time passed [minutes]: 108.92.     accuracy on test:                         0.9843
+Time passed [minutes]: 108.92.     accuracy on FGSM constructed examples:    0.15980000000000005
+Time passed [minutes]: 108.92.     accuracy on PGD constructed examples:     0.0
+Time passed [minutes]: 108.92.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 109.13.     Epoch 1. Train adversarial accuracy: 0.709499.Train accuracy: 0.84,  Train loss:  0.85
+
+Time passed [minutes]: 109.35.     Epoch 2. Train adversarial accuracy: 0.863184.Train accuracy: 0.88,  Train loss:  0.42
+
+Time passed [minutes]: 109.57.     Epoch 3. Train adversarial accuracy: 0.890808.Train accuracy: 0.89,  Train loss:  0.34
+
+Time passed [minutes]: 109.78.     Epoch 4. Train adversarial accuracy: 0.904212.Train accuracy: 0.86,  Train loss:  0.30
+
+Time passed [minutes]: 110.00.     Epoch 5. Train adversarial accuracy: 0.910864.Train accuracy: 0.86,  Train loss:  0.28
+
+Time passed [minutes]: 110.22.     Epoch 6. Train adversarial accuracy: 0.916633.Train accuracy: 0.86,  Train loss:  0.26
+
+Time passed [minutes]: 110.43.     Epoch 7. Train adversarial accuracy: 0.920970.Train accuracy: 0.89,  Train loss:  0.25
+
+Time passed [minutes]: 110.65.     Epoch 8. Train adversarial accuracy: 0.930121.Train accuracy: 0.86,  Train loss:  0.22
+
+Time passed [minutes]: 110.87.     Epoch 9. Train adversarial accuracy: 0.933247.Train accuracy: 0.81,  Train loss:  0.21
+
+Time passed [minutes]: 111.08.     Epoch 10. Train adversarial accuracy: 0.936223.Train accuracy: 0.83,  Train loss:  0.20
+
+Time passed [minutes]: 111.30.     Epoch 11. Train adversarial accuracy: 0.939743.Train accuracy: 0.83,  Train loss:  0.19
+
+Time passed [minutes]: 111.52.     Epoch 12. Train adversarial accuracy: 0.941603.Train accuracy: 0.82,  Train loss:  0.18
+
+Time passed [minutes]: 111.74.     Epoch 13. Train adversarial accuracy: 0.944946.Train accuracy: 0.83,  Train loss:  0.17
+
+Time passed [minutes]: 111.96.     Epoch 14. Train adversarial accuracy: 0.947578.Train accuracy: 0.80,  Train loss:  0.16
+
+Time passed [minutes]: 112.18.     Epoch 15. Train adversarial accuracy: 0.948272.Train accuracy: 0.71,  Train loss:  0.16
+
+Time passed [minutes]: 112.18.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'epsilon': 0.3}
+Time passed [minutes]: 112.23.     %accuracy on attack: 0.9541223404255319 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 112.23.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 112.61.     %accuracy on attack: 0.0026595744680850686 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 112.61.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 112.90.     TEST SCORES of capacity_6 with FGSM adversarial training:
+Time passed [minutes]: 112.90.     accuracy on test:                         0.7282
+Time passed [minutes]: 112.90.     accuracy on FGSM constructed examples:    0.9493
+Time passed [minutes]: 112.90.     accuracy on PGD constructed examples:     0.0
+Time passed [minutes]: 112.90.     
+Full Train(training on all training dataset) with selected hp: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 114.22.     Epoch 1. Train adversarial accuracy: 0.416234.Train accuracy: 0.82,  Train loss:  1.61
+
+Time passed [minutes]: 115.54.     Epoch 2. Train adversarial accuracy: 0.566515.Train accuracy: 0.95,  Train loss:  1.19
+
+Time passed [minutes]: 116.86.     Epoch 3. Train adversarial accuracy: 0.609053.Train accuracy: 0.96,  Train loss:  1.09
+
+Time passed [minutes]: 118.17.     Epoch 4. Train adversarial accuracy: 0.634356.Train accuracy: 0.96,  Train loss:  1.02
+
+Time passed [minutes]: 119.48.     Epoch 5. Train adversarial accuracy: 0.654406.Train accuracy: 0.96,  Train loss:  0.98
+
+Time passed [minutes]: 120.79.     Epoch 6. Train adversarial accuracy: 0.667294.Train accuracy: 0.96,  Train loss:  0.94
+
+Time passed [minutes]: 122.11.     Epoch 7. Train adversarial accuracy: 0.681536.Train accuracy: 0.96,  Train loss:  0.91
+
+Time passed [minutes]: 123.43.     Epoch 8. Train adversarial accuracy: 0.692159.Train accuracy: 0.96,  Train loss:  0.89
+
+Time passed [minutes]: 124.76.     Epoch 9. Train adversarial accuracy: 0.701137.Train accuracy: 0.96,  Train loss:  0.86
+
+Time passed [minutes]: 126.10.     Epoch 10. Train adversarial accuracy: 0.707806.Train accuracy: 0.96,  Train loss:  0.84
+
+Time passed [minutes]: 127.43.     Epoch 11. Train adversarial accuracy: 0.715302.Train accuracy: 0.97,  Train loss:  0.82
+
+Time passed [minutes]: 128.77.     Epoch 12. Train adversarial accuracy: 0.722004.Train accuracy: 0.97,  Train loss:  0.81
+
+Time passed [minutes]: 130.09.     Epoch 13. Train adversarial accuracy: 0.727978.Train accuracy: 0.97,  Train loss:  0.79
+
+Time passed [minutes]: 131.41.     Epoch 14. Train adversarial accuracy: 0.734142.Train accuracy: 0.97,  Train loss:  0.77
+
+Time passed [minutes]: 132.72.     Epoch 15. Train adversarial accuracy: 0.739456.Train accuracy: 0.97,  Train loss:  0.76
+
+Time passed [minutes]: 132.72.     training selected hyperparams: {'lr': 0.0003, 'batch_size': 128, 'lr_scheduler_gamma': 0.95, 'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 132.76.     %accuracy on attack: 0.8490137411347518 with hp: {'epsilon': 0.3}
+Time passed [minutes]: 132.76.     FGSM attack selected hyperparams: {'epsilon': 0.3}
+Time passed [minutes]: 133.14.     %accuracy on attack: 0.746730939716312 with hp: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 133.14.     PGD attack selected hyperparams: {'alpha': 0.01, 'steps': 30, 'epsilon': 0.3}
+Time passed [minutes]: 133.44.     TEST SCORES of capacity_6 with PGD adversarial training:
+Time passed [minutes]: 133.44.     accuracy on test:                         0.9713
+Time passed [minutes]: 133.44.     accuracy on FGSM constructed examples:    0.8505
+Time passed [minutes]: 133.44.     accuracy on PGD constructed examples:     0.7525999999999999
