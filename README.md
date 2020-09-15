@@ -31,6 +31,9 @@ see configs.py to set configs. The configurations on this reposetory are tested 
 In nova I occurred a bug "ImportError: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.21' not found (required by home/wolf/sagieb/course/miniconda3/envs/hw4_env/lib/python3.7/site-packages/kiwisolver.cpython-37m-x86_64-linux-gnu.so)".
 To fix the bug I add: "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/wolf/sagieb/course/miniconda3/lib/" 
 
+## Execution Example
+see an_example_of_execution_results folder README.md.
+
 ## The files in the project:
 * experiments.py - the main file of the project. To execute the project run this file as explained in the previous section.
 * attacks.py - the adversarial attacks implementations. PGD and FGSM classes are the 
