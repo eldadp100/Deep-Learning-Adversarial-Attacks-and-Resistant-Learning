@@ -1,4 +1,4 @@
-# Deep Learning Adversarial Attacks and Resistant Models Learning Techniques
+# Deep Learning Adversarial Attacks and Resistant Learning
 based on Towards Deep Learning Models Resistant to Adversarial Attacks paper - https://arxiv.org/pdf/1706.06083.pdf.
 
 For any grading problem please send me an email to eldadperetz@mail.tau.ac.il.
